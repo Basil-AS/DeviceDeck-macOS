@@ -70,6 +70,10 @@ public struct DeviceState: Sendable {
     /// Raw Edifier D8 capability payload. Preserve unknown bits for diagnostics
     /// instead of interpreting undocumented fields as enabled controls.
     public var edifierCapabilities: [UInt8]?
+    public var edifierCapabilityReport: EdifierCapabilityReport? {
+        guard let edifierCapabilities else { return nil }
+        return EdifierCapabilityReport(payload: edifierCapabilities)
+    }
     public var observedQueries: Set<UInt16> = []
     public init() {}
 
