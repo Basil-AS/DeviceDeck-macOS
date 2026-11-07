@@ -74,7 +74,8 @@ extension DeviceModel {
             guard let id=node["id"].int.flatMap(UInt8.init(exactly:)),let zh=node["zh"].text,let en=node["en"].text else { return nil }
             return EQPreset(id:id,chinese:zh,english:en,minimumFirmware:nil)
         }
-        return DeviceModel(raw:entry,id:id,name:name,brand:brand,aliases:entry["children"].elements.compactMap { $0["name"].text },noiseOptions:noise,presets:presets)
+        let aliases=entry["children"].elements.compactMap { $0["name"].text }+entry["aliases"].elements.compactMap(\.text)
+        return DeviceModel(raw:entry,id:id,name:name,brand:brand,aliases:aliases,noiseOptions:noise,presets:presets)
     }
     public static func readOnly(name:String,family:EarbudFamily) -> DeviceModel {
         DeviceModel(raw:.object(["protocolFamily":.string(family.rawValue)]),id:family.rawValue+":unknown",name:name,brand:family.rawValue,aliases:[],noiseOptions:[],presets:[])

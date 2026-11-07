@@ -31,7 +31,7 @@ private func hex(_ string:String) -> [UInt8] { string.split(separator:" ").map {
     #expect(c.family(name:"my Redmi Buds") == .xiaomi)
     #expect(c.family(name:"W820NB Plus") == .edifier)
     let edifier=try #require(c.model(productID:nil,name:"W820NB Plus"))
-    #expect(edifier.transportKinds == ["BLE"])
+    #expect(edifier.family.transportKinds(for:edifier.name) == ["BLE"])
     #expect(edifier.noiseOptions.map(\.mode) == [.off,.anc,.transparency])
     #expect(c.family(name:"AirPods Pro") == nil)
     #expect(c.family(name:"Beats Fit Pro") == nil)
