@@ -52,6 +52,14 @@ private func hex(_ string:String) -> [UInt8] { string.split(separator:" ").map {
     #expect(state.observedQueries.contains(0xD8))
     #expect(!BrandState.apply(BrandFrame(0xD8,[1]),model:model,to:&state))
 }
+
+@Test func edifierD8ReportDecodesOnlyKnownPresentCapabilityBits() throws {
+    let payload:[UInt8]=[0,1,1,0,1,1,0,0,1,1,0,0,0,2,0,0,0,0x48,0x11,0,0x13]
+    let report=try #require(EdifierCapabilityReport(payload:payload))
+    #expect(report.reportedControls == ["battery","readName","readAddress","firmware","autoPowerOff","sleepTimer","equalizer","gameMode","touchSensitivity","wearDetection","windNoise","hearingProtection","soundSpace","voicePrompts"])
+    #expect(EdifierCapabilityReport(payload:[1,2,3]) == nil)
+    #expect(report.payload == payload)
+}
 @Test func goldenBrandFramesAndEveryStreamSplit() throws {
     let fixtures:[(EarbudFamily,UInt8,Bool,BrandFrame,[UInt8])]=[
         (.vivo,3,false,BrandFrame(0x0300),hex("FF 04 00 00 00 0A 03 00")),
