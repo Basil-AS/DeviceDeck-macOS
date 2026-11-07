@@ -507,6 +507,24 @@ struct PanelView: View {
                 infoRow(L("编解码器","Codec"),app.state.codec ?? "—")
                 infoRow(L("控制连接","Control transport"),app.transportLabel.isEmpty ? "—" : app.transportLabel)
             }.card()
+            if let report=app.state.edifierCapabilityReport {
+                VStack(alignment:.leading,spacing:8) {
+                    Text(L("设备报告的能力","Capabilities reported by device"))
+                        .font(.system(size:12,weight:.semibold)).foregroundStyle(.secondary)
+                    if report.reportedControls.isEmpty {
+                        Text(L("设备未报告可识别的控制项。","The device did not report any recognized controls."))
+                            .font(.system(size:11)).foregroundStyle(.secondary)
+                    } else {
+                        ForEach(report.reportedControls,id:\.self) { key in
+                            if let label=EdifierCapabilityReport.labels.first(where:{$0.key == key}) {
+                                infoRow(L(label.zh,label.en),L("由设备报告","Reported by device"))
+                            }
+                        }
+                    }
+                    Text(L("报告能力不表示该功能已在 DeviceDeck 中实现。","A reported capability does not mean DeviceDeck implements that control yet."))
+                        .font(.system(size:10)).foregroundStyle(.tertiary)
+                }.card()
+            }
         }
     }
     private var advancedPage:some View {
