@@ -60,6 +60,9 @@ import HeyBudsProtocol
             if state.observedQueries.isEmpty,model.raw["sourceCapabilities"]["SupportsAncStateReadback"].enabled { _ = try? await read(Command.noise) }
             guard !state.observedQueries.isEmpty else { throw ProtocolError.invalidPayload }
         case .edifier:
+            // Capabilities are a read-only first probe. Older firmware may not
+            // answer D8, so controls still require their own successful reads.
+            _ = try? await request(0xD8,timeout:1.2)
             _ = try? await read(Command.battery)
             if state.observedQueries.isEmpty { _ = try? await read(Command.noise) }
             guard !state.observedQueries.isEmpty else { throw ProtocolError.invalidPayload }

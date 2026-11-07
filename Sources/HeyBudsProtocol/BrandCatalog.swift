@@ -8,6 +8,7 @@ public enum EarbudFamily: String, Codable, CaseIterable, Sendable {
         if self == .xiaomi,let profile=XiaomiProfile.named(name) { return profile.transportKinds }
         if self == .jbl { return JBLProfile.named(name)?.usesBLE == true ? ["BLE"] : ["RFCOMM"] }
         if self == .oppo { return ["RFCOMM","BLE"] }
+        if self == .edifier,EarbudFamily.normalize(name).contains("w820nbplus") { return ["BLE"] }
         if self == .bose,BoseProfile.named(name)?.prefersBLE == true { return ["BLE"] }
         return ["RFCOMM"]
     }
@@ -73,7 +74,8 @@ extension DeviceModel {
             guard let id=node["id"].int.flatMap(UInt8.init(exactly:)),let zh=node["zh"].text,let en=node["en"].text else { return nil }
             return EQPreset(id:id,chinese:zh,english:en,minimumFirmware:nil)
         }
-        return DeviceModel(raw:entry,id:id,name:name,brand:brand,aliases:entry["children"].elements.compactMap { $0["name"].text },noiseOptions:noise,presets:presets)
+        let aliases=entry["children"].elements.compactMap { $0["name"].text }+entry["aliases"].elements.compactMap(\.text)
+        return DeviceModel(raw:entry,id:id,name:name,brand:brand,aliases:aliases,noiseOptions:noise,presets:presets)
     }
     public static func readOnly(name:String,family:EarbudFamily) -> DeviceModel {
         DeviceModel(raw:.object(["protocolFamily":.string(family.rawValue)]),id:family.rawValue+":unknown",name:name,brand:family.rawValue,aliases:[],noiseOptions:[],presets:[])
