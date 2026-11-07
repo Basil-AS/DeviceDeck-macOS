@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0-alpha.3 — 2026-11-07
+
+- Match Edifier D8 informational capability labels to the exact scalar values parsed by Edifier Connect; reserved/non-Boolean values no longer appear as supported controls.
+- Исправлено отображение возможностей Edifier D8: поля теперь трактуются точно по парсеру EDIFIER Connect, зарезервированные и не-логические значения не показываются как поддерживаемые функции.
+- No commands were added. W820NB Plus hardware behavior remains unverified.
+
 ## 0.7.0-alpha.2 — 2026-11-07
 
 - Show the documented capabilities reported by Edifier W820NB Plus D8 responses on the device-info page. This is informational and does not imply that every reported control is implemented.
