@@ -9,7 +9,7 @@ import tempfile
 
 @contextmanager
 def mounted(image):
-    with tempfile.TemporaryDirectory(prefix='HeyBuds-dmg-') as directory:
+    with tempfile.TemporaryDirectory(prefix='DeviceDeck-dmg-') as directory:
         mountpoint = Path(directory) / 'volume'
         mountpoint.mkdir()
         result = subprocess.check_output([
@@ -30,7 +30,7 @@ def create(app, output):
     assert app.is_dir() and app.suffix == '.app', 'Expected an application bundle'
     assert output.suffix == '.dmg', 'Expected a DMG output'
     output.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix='.HeyBuds-dmg-', dir=output.parent) as directory:
+    with tempfile.TemporaryDirectory(prefix='.DeviceDeck-dmg-', dir=output.parent) as directory:
         stage = Path(directory)
         contents = stage / 'contents'
         contents.mkdir()

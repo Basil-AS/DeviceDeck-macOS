@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.7.0-alpha.1 — 2026-11-07
+
+- Rebrand the macOS app as DeviceDeck with its own bundle ID, icon, project URL and release destination; migrate preferences from prior HeyBuds/EncoBar installations.
+- Remove the inherited Sparkle feed and installer. The update button now opens DeviceDeck Releases, keeping updates under project control and reducing the app bundle.
+- Add an initial BLE profile and D8 capability capture for Edifier W820NB Plus, with battery and ANC/transparency controls. Physical-device validation is still required.
+- Publish macOS artifacts from `macos-v*` tags through GitHub Actions.
+
+- Give DeviceDeck its own macOS name, bundle ID, icon, project/release links and preference migration from HeyBuds and EncoBar.
+- Remove the upstream Sparkle feed and installer. The update action now opens DeviceDeck Releases and the app bundle is smaller.
+- Add an initial Edifier W820NB Plus BLE profile and D8 capability capture, plus battery and ANC/transparency controls. Hardware validation remains outstanding.
+- Add GitHub Actions publication for `macos-v*` tags.
+
 ## 0.6.1-beta.2 — 2026-11-02
 
 - 新增 Apple Silicon Mac 上的 macOS 15 支持，降噪、导航和操作按钮使用兼容样式，保留原有布局与功能。
