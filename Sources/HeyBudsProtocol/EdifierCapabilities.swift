@@ -26,15 +26,15 @@ public struct EdifierCapabilityReport: Equatable, Sendable {
     public var reportedControls: [String] {
         var result: [String] = []
         if value(1).map({ $0 > 0 }) == true { result.append("battery") }
-        if value(2).map({ $0 > 0 }) == true { result.append("readName") }
-        if value(3).map({ $0 > 0 }) == true { result.append("setName") }
-        if value(4).map({ $0 > 0 }) == true { result.append("readAddress") }
-        if value(5).map({ $0 > 0 }) == true { result.append("firmware") }
-        if value(6).map({ $0 > 0 }) == true { result.append("disconnectAudio") }
-        if value(7).map({ $0 > 0 }) == true { result.append("repairBluetooth") }
-        if value(8).map({ $0 > 0 }) == true { result.append("autoPowerOff") }
+        if value(2) == 1 { result.append("readName") }
+        if let nameMode=value(3),(1...6).contains(nameMode) { result.append("setName") }
+        if value(4) == 1 { result.append("readAddress") }
+        if value(5) == 1 { result.append("firmware") }
+        if value(6) == 1 { result.append("disconnectAudio") }
+        if value(7) == 1 { result.append("repairBluetooth") }
+        if value(8) == 1 { result.append("autoPowerOff") }
         if value(9).map({ $0 > 0 }) == true { result.append("sleepTimer") }
-        if value(10).map({ $0 > 0 }) == true { result.append("powerOff") }
+        if value(10) == 1 { result.append("powerOff") }
         if value(13).map({ $0 > 0 }) == true { result.append("equalizer") }
         if let game = bit(17, 6), game { result.append("gameMode") }
         if let sensitivity = bit(17, 3), sensitivity { result.append("touchSensitivity") }
