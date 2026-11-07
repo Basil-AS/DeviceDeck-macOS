@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0-alpha.2 — 2026-11-07
+
+- Show the documented capabilities reported by Edifier W820NB Plus D8 responses on the device-info page. This is informational and does not imply that every reported control is implemented.
+- 保留 Edifier W820NB Plus 设备返回的 D8 能力数据，并在设备信息页展示已知能力。此信息不代表应用已实现所有对应控制。
+- Edifier protocol/UI tests, source audit, app bundle audit and DMG packaging pass in GitHub Actions. Physical W820NB Plus behavior remains unverified.
+
 ## 0.7.0-alpha.1 — 2026-11-07
 
 - Rebrand the macOS app as DeviceDeck with its own bundle ID, icon, project URL and release destination; migrate preferences from prior HeyBuds/EncoBar installations.
