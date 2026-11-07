@@ -80,4 +80,4 @@ def audit():
 
 if __name__ == '__main__':
     files, version = audit()
-    print(f'Public source audit passed: HeyBuds {version}, {len(files)} files, 283 catalog records.')
+    print(f'Public source audit passed: DeviceDeck {version}, {len(files)} files, 283 catalog records.')

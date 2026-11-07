@@ -27,15 +27,14 @@ import HeyBudsBluetooth
     private var explicitAccess=false
     func applicationDidFinishLaunching(_ notification:Notification) {
         NSApp.setActivationPolicy(.accessory)
-        let otherControllers=[Bundle.main.bundleIdentifier ?? AppIdentity.bundleID,AppIdentity.legacyBundleID]
+        let watchedIDs=[AppIdentity.bundleID]+AppIdentity.legacyBundleIDs
+        let otherControllers=watchedIDs
             .flatMap { NSRunningApplication.runningApplications(withBundleIdentifier:$0) }
             .filter { $0.processIdentifier != ProcessInfo.processInfo.processIdentifier }
         guard otherControllers.isEmpty else {
-            if otherControllers.contains(where:{$0.bundleIdentifier == AppIdentity.legacyBundleID}) {
-                let alert=NSAlert();alert.messageText=AppIdentity.name
-                alert.informativeText="请先退出旧版 EncoBar，再打开 HeyBuds。 / Quit the legacy EncoBar before opening HeyBuds."
-                alert.runModal()
-            }
+            let alert=NSAlert();alert.messageText=AppIdentity.name
+            alert.informativeText="请先退出其他耳机控制应用，再打开 DeviceDeck。 / Quit the other earbud controller before opening DeviceDeck."
+            alert.runModal()
             NSApp.terminate(nil);return
         }
         AppIdentity.migrateLegacyPreferences()
@@ -89,7 +88,7 @@ import HeyBudsBluetooth
         if CommandLine.arguments.contains("--window-preview") {
             NSApp.setActivationPolicy(.regular)
             let window=NSWindow(contentRect:NSRect(x:0,y:0,width:360,height:620),styleMask:[.titled,.closable],backing:.buffered,defer:false)
-            window.title="HeyBuds · Preview"; window.isReleasedWhenClosed=false
+            window.title="DeviceDeck · Preview"; window.isReleasedWhenClosed=false
             if CommandLine.arguments.contains("--tip-preview") {
                 window.setContentSize(ConnectionTipView.size)
                 window.contentViewController=NSHostingController(rootView:ConnectionTipPreviewView(app:model))
@@ -169,15 +168,15 @@ import HeyBudsBluetooth
            (!model.connectionTips || !connected.contains(where:{$0.id == connectionToast.deviceID})) { connectionToast.dismiss(animated:false) }
         statusItem.isVisible=ConnectionPresence.showsStatusItem(background:model.backgroundMode,hasConnection:!connected.isEmpty,
             explicitAccess:explicitAccess || popover.isShown || connectionToast.isShown)
-        let image=NSImage(systemSymbolName:!connected.isEmpty || model.ready ? EarbudIcon.pair : EarbudIcon.enclosure,accessibilityDescription:"HeyBuds")
+        let image=NSImage(systemSymbolName:!connected.isEmpty || model.ready ? EarbudIcon.pair : EarbudIcon.enclosure,accessibilityDescription:"DeviceDeck")
         image?.isTemplate=true; button.image=image
         button.appearsDisabled = connected.isEmpty && !model.ready
         if model.menuBattery, model.ready {
             button.title=(model.state.batteries.sorted(by:{$0.key.rawValue < $1.key.rawValue}).map { $0.value } + model.state.unassignedBatteries.sorted(by:{$0.key < $1.key}).map { $0.value }).map { "\($0.percent)%" }.joined(separator:" ")
             button.imagePosition = .imageLeading
         } else { button.title="" }
-        button.toolTip="HeyBuds · \(model.status)"
-        button.setAccessibilityLabel("HeyBuds · \(model.status)")
+        button.toolTip="DeviceDeck · \(model.status)"
+        button.setAccessibilityLabel("DeviceDeck · \(model.status)")
         // Explicit local QA mode: expose the real AppKit visibility, without any
         // device identifiers, so hidden/reopen behavior can be verified safely.
         #if DEBUG
@@ -219,7 +218,7 @@ import HeyBudsBluetooth
     }
     private func dismissPanelForUpdate() {
         guard popover.isShown else { return }
-        // Finish closing the higher-level popover before Sparkle shows its window.
+        // Close the popover before opening the Releases page.
         let animates=popover.animates
         popover.animates=false
         popover.performClose(nil)

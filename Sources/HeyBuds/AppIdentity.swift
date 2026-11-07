@@ -3,13 +3,13 @@ import Foundation
 /// The legacy identity is retained only to migrate local settings and prevent
 /// two generations of the app from owning the same earbud control session.
 enum AppIdentity {
-    static let name="HeyBuds"
-    static let version="0.6.1-beta.2"
-    static let projectURL=URL(string:"https://github.com/abaichuan1017/HeyBuds")!
+    static let name="DeviceDeck"
+    static let version="0.7.0-alpha.1"
+    static let projectURL=URL(string:"https://github.com/Basil-AS/DeviceDeck-macOS")!
     static let releasesURL=projectURL.appendingPathComponent("releases/latest")
-    static let bundleID="local.heybuds.app"
-    static let legacyBundleID="local.encobar.app"
-    static let migrationKey="heybudsPreferencesMigratedV1"
+    static let bundleID="app.devicedeck.macos"
+    static let legacyBundleIDs=["local.heybuds.app","local.encobar.app"]
+    static let migrationKey="devicedeckPreferencesMigratedV1"
 
     static func migratedPreferences(current:[String:Any],legacy:[String:Any]) -> [String:Any] {
         guard current[migrationKey] as? Bool != true else { return current }
@@ -27,7 +27,9 @@ enum AppIdentity {
     static func migrateLegacyPreferences(defaults:UserDefaults = .standard) {
         let current=defaults.persistentDomain(forName:bundleID) ?? [:]
         guard current[migrationKey] as? Bool != true else { return }
-        let legacy=defaults.persistentDomain(forName:legacyBundleID) ?? [:]
+        let legacy=legacyBundleIDs.reduce(into:[String:Any]()) { result,id in
+            for (key,value) in defaults.persistentDomain(forName:id) ?? [:] where result[key] == nil { result[key]=value }
+        }
         defaults.setPersistentDomain(migratedPreferences(current:current,legacy:legacy),forName:bundleID)
     }
 }

@@ -22,7 +22,7 @@ OPPO 同时保留 RFCOMM 与 BLE GATT；vivo/华为/小米旧系列/漫步者由
 
 运行最低版本为 macOS 15。`ControlAppearance` 在 macOS 26+ 使用原有 Liquid Glass API，在旧系统使用系统材质和 bordered/borderedProminent 按钮；布局、动作与会话状态共用同一实现。减少透明度时降噪按钮继续使用实色背景。
 
-型号资源是 GPL 上游 JSON（X4 使用独立 EncoDeck 补充表），保留完整未知字段及固件约束。支持的功能由型号、运行时能力位与已成功解析的响应共同约束。设备控制不依赖网络。用户主动检查更新时使用 Sparkle 的原生窗口与安装辅助服务，通过签名 feed 下载并验证发行包。
+型号资源是 GPL 上游 JSON（X4 使用独立 EncoDeck 补充表），保留完整未知字段及固件约束。支持的功能由型号、运行时能力位与已成功解析的响应共同约束。设备控制不依赖网络。更新操作只打开 DeviceDeck 自己的 GitHub Releases 页面；更新由用户下载 DMG 后手动安装，不嵌入 Sparkle 或其他自动安装器。
 
 ## 多品牌
 

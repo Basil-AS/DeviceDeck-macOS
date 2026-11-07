@@ -91,7 +91,7 @@ func L(_ chinese:String,_ english:String) -> String { UserDefaults.standard.stri
     var connecting:Bool { phase == "connecting" }
     // The header and connection card use the macOS Bluetooth name, which may be
     // a personal nickname. The protocol model name belongs in Device info.
-    var title:String { candidate?.name ?? "HeyBuds" }
+    var title:String { candidate?.name ?? AppIdentity.name }
     var bluetoothConnected:Bool { !sleeping && (candidate?.audioConnected == true || ready) }
     var transportLabel:String { session?.transport.label ?? "" }
     var knownConnectedDevices:[DeviceCandidate] {
@@ -213,7 +213,7 @@ func L(_ chinese:String,_ english:String) -> String { UserDefaults.standard.stri
         guard !connecting, !sleeping else { return }
         guard let candidate else { error=L("先在系统蓝牙设置中配对耳机。","Pair your earbuds in Bluetooth settings first."); return }
         guard let family=connectionFamily else { error=L("无法识别耳机控制协议。","The earbud control protocol could not be identified.");return }
-        if services.hasCompetitor() { error=L("请先退出另一个耳机控制器，再连接 HeyBuds。","Quit the other earbud controller before connecting HeyBuds."); return }
+        if services.hasCompetitor() { error=L("请先退出另一个耳机控制器，再连接 DeviceDeck。","Quit the other earbud controller before connecting DeviceDeck."); return }
         cancelRetry();connectTask?.cancel();invalidateOperation();sessionID=UUID();session?.close();session=nil
         let token=UUID(); connectionToken=token
         manualDisconnect=false; error=nil; notice=nil; noiseControlHint=nil; phase="connecting"; onStatusChange?()
@@ -375,7 +375,7 @@ func L(_ chinese:String,_ english:String) -> String { UserDefaults.standard.stri
         for (slot,value) in state.batteries {
             guard let identifier=lowAlerts.notificationID(device:device,slot:slot,reading:value,threshold:lowThreshold) else { continue }
             let content=UNMutableNotificationContent()
-            content.title="HeyBuds"
+            content.title=AppIdentity.name
             let part=model?.singleBattery == true ? L("耳机","Headphones") : slot == .left ? L("左耳","Left earbud") : slot == .right ? L("右耳","Right earbud") : L("充电盒","Case")
             content.body="\(part) · \(value.percent)%"; content.sound = .default
             UNUserNotificationCenter.current().add(UNNotificationRequest(identifier:identifier,content:content,trigger:nil))
@@ -391,9 +391,9 @@ func L(_ chinese:String,_ english:String) -> String { UserDefaults.standard.stri
         NSWorkspace.shared.open(URL(string:"x-apple.systempreferences:com.apple.BluetoothSettings")!)
     }
     func exportDiagnostics() {
-        let panel=NSSavePanel(); panel.nameFieldStringValue="HeyBuds-diagnostics.json"
+        let panel=NSSavePanel(); panel.nameFieldStringValue="DeviceDeck-diagnostics.json"
         guard panel.runModal() == .OK, let url=panel.url else { return }
-        let report:[String:Any]=["app":"HeyBuds", "version":AppIdentity.version, "os":ProcessInfo.processInfo.operatingSystemVersionString,
+        let report:[String:Any]=["app":AppIdentity.name, "version":AppIdentity.version, "os":ProcessInfo.processInfo.operatingSystemVersionString,
             "phase":phase,"transport":transportLabel,"catalogModels":catalog.models.count,
             "productID":state.productID ?? "unknown","modelID":model?.id ?? "unknown",
             "firmware":state.firmware ?? "unknown","queries":state.observedQueries.sorted().map{String(format:"%04X",$0)},
@@ -402,7 +402,7 @@ func L(_ chinese:String,_ english:String) -> String { UserDefaults.standard.stri
         catch { self.error=error.localizedDescription }
     }
     func diagnosticSnapshot() -> [String:Any] {
-        var value:[String:Any]=["app":"HeyBuds","version":AppIdentity.version,"phase":phase,"transport":transportLabel,
+        var value:[String:Any]=["app":AppIdentity.name,"version":AppIdentity.version,"phase":phase,"transport":transportLabel,
             "timestamp":ISO8601DateFormatter().string(from:Date()),"productID":state.productID ?? "unknown",
             "firmware":state.firmware ?? "unknown","noise":state.noise?.rawValue ?? "unknown",
             "eq":state.eq.map(Int.init) ?? -1,"spatial":state.spatial.map(Int.init) ?? -1,

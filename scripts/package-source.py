@@ -13,13 +13,13 @@ spec.loader.exec_module(audit)
 files, version = audit.audit()
 output = ROOT / 'releases'
 output.mkdir(exist_ok=True)
-archive = output / f'HeyBuds-v{version}-source.zip'
+archive = output / f'DeviceDeck-v{version}-source.zip'
 manifest = []
 with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as z:
     for path in files:
         relative = path.relative_to(ROOT).as_posix()
         data = path.read_bytes()
-        info = zipfile.ZipInfo('HeyBuds/' + relative, date_time=(2026, 10, 17, 0, 0, 0))
+        info = zipfile.ZipInfo('DeviceDeck/' + relative, date_time=(2026, 10, 17, 0, 0, 0))
         info.create_system = 3
         mode = 0o755 if path.suffix == '.sh' else 0o644
         info.external_attr = (stat.S_IFREG | mode) << 16
@@ -30,9 +30,9 @@ with zipfile.ZipFile(archive) as z:
     assert z.testzip() is None
     assert len(z.namelist()) == len(files)
 manifest_file = output / 'source-manifest.json'
-manifest_file.write_text(json.dumps({'app': 'HeyBuds', 'version': version, 'files': manifest}, indent=2) + '\n')
+manifest_file.write_text(json.dumps({'app': 'DeviceDeck', 'version': version, 'files': manifest}, indent=2) + '\n')
 artifacts = [archive, manifest_file]
-app_image = ROOT / 'dist/HeyBuds-arm64.dmg'
+app_image = ROOT / 'dist/DeviceDeck-macos-arm64.dmg'
 if app_image.is_file():
     artifacts.append(app_image)
 checksums = '\n'.join(hashlib.sha256(p.read_bytes()).hexdigest() + '  ' + p.name for p in artifacts) + '\n'

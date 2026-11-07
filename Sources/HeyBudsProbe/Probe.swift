@@ -23,7 +23,7 @@ import HeyBudsBluetooth
                 for (i,device) in await Discovery.paired(catalog:catalog).enumerated() { print("\(i+1). \(device.name) · audio=\(device.audioConnected)") }
             } else if args.first == "read" {
                 let devices=await Discovery.paired(catalog:catalog)
-                guard let device=devices.first(where:{$0.audioConnected}) else { throw TransportFailure.unavailable("No paired connected earbuds. Use HeyBuds.app to grant Bluetooth permission.") }
+                guard let device=devices.first(where:{$0.audioConnected}) else { throw TransportFailure.unavailable("No paired connected earbuds. Use DeviceDeck.app to grant Bluetooth permission.") }
                 guard let family=device.family ?? catalog.family(name:device.name) else { throw ProtocolError.unsupported }
                 let kind=family == .xiaomi && XiaomiProfile.named(device.name)?.systemBatteryOnly == true ? "System" : args.contains("--ble") || family.transportKinds(for:device.name) == ["BLE"] ? "BLE" : "RFCOMM"
                 let transport=try ControlTransportFactory.make(device:device,family:family,kind:kind)

@@ -1,6 +1,6 @@
 # Validation
 
-Protocol and session tests cover simulated device responses. Application checks cover presentation, preference migration and signed update delivery. See [Actions](https://github.com/abaichuan1017/HeyBuds/actions) for build status.
+Protocol and session tests cover simulated device responses. Application checks cover presentation and migration of preferences from the HeyBuds and EncoBar bundle IDs. See [DeviceDeck Actions](https://github.com/Basil-AS/DeviceDeck-macOS/actions) for build status. This software validation does not replace physical-device checks.
 
 The macOS 15 prerelease compiles with a macOS 15 deployment target. Automated checks cover both control styles' layout and compatibility-style rendering in light/dark appearance with opaque/material surfaces on the development system. Liquid Glass uses native compositing and requires a window for visual inspection. These checks do not substitute for running the packaged application on macOS 15; runtime, Bluetooth permissions, reconnect and sleep/wake acceptance there remain pending.
 

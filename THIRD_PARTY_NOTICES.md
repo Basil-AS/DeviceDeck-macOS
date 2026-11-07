@@ -41,12 +41,6 @@ HeyBuds is distributed under **GPL-3.0-or-later**. See LICENSE.
 - [Sony Device Center](https://github.com/marconvcm/sony-device-center) was used to cross-check model profiles and V2 payloads. No C++ client or binary is bundled.
 - Exact revisions and source fingerprints are recorded in `docs/upstream-sources.json`. Only explicitly listed V1/V2 profiles are enabled; upstream support reports do not establish HeyBuds hardware compatibility. Manufacturer applications, extracted metadata, artwork and raw device captures are not included.
 
-## Sparkle
-
-- Source: https://github.com/sparkle-project/Sparkle (2.10.0).
-- MIT / included component licenses; complete notices in `Licenses/Sparkle.txt`.
-- Provides the native update, download and installation interface. Thanks to the Sparkle contributors.
-
 ## GitHub mark
 
 - Official asset: https://brand.github.com/foundations/logo (GitHub Invertocat, black PDF).
