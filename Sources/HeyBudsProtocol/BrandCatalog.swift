@@ -8,6 +8,7 @@ public enum EarbudFamily: String, Codable, CaseIterable, Sendable {
         if self == .xiaomi,let profile=XiaomiProfile.named(name) { return profile.transportKinds }
         if self == .jbl { return JBLProfile.named(name)?.usesBLE == true ? ["BLE"] : ["RFCOMM"] }
         if self == .oppo { return ["RFCOMM","BLE"] }
+        if self == .edifier,normalize(name).contains("w820nbplus") { return ["BLE"] }
         if self == .bose,BoseProfile.named(name)?.prefersBLE == true { return ["BLE"] }
         return ["RFCOMM"]
     }

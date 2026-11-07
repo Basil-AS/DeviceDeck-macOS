@@ -13,6 +13,7 @@ import HeyBudsProtocol
         }
         if kind == "BLE" {
             if family == .oppo { return BLETransport(name:device.name) }
+            if family == .edifier,device.name.localizedCaseInsensitiveContains("W820NB Plus") { return BLETransport(name:device.name,profile:.edifier) }
             if family == .bose,BoseProfile.named(device.name)?.prefersBLE == true { return BLETransport(name:device.name,profile:.bose) }
             if family == .jbl,JBLProfile.named(device.name)?.usesBLE == true { return BLETransport(name:device.name,profile:.jbl) }
             throw ProtocolError.unsupported
