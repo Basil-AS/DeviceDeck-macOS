@@ -29,6 +29,11 @@ jobs:
           xcrun --sdk macosx --show-sdk-version
           swift --version
           python3 -c 'import re,subprocess; sdk=subprocess.check_output(["xcrun","--sdk","macosx","--show-sdk-version"],text=True).strip(); swift=subprocess.check_output(["swift","--version"],text=True); assert int(sdk.split(".")[0]) >= 27; version=re.search(r"Swift version (\d+)\.(\d+)",swift); assert version and tuple(map(int,version.groups())) >= (6,4)'
+      - name: Match release tag to app version
+        if: startsWith(github.ref, 'refs/tags/macos-v')
+        run: |
+          declared="$(sed -n 's/.*static let version="\([^"]*\)".*/\1/p' Sources/HeyBuds/AppIdentity.swift)"
+          test "$declared" = "${GITHUB_REF_NAME#macos-v}"
       - name: Audit public source
         run: python3 scripts/audit-source.py
       - name: Run protocol, session and presentation tests
@@ -71,8 +76,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           version="${GITHUB_REF_NAME#macos-v}"
+          assets=(release-assets/dist/DeviceDeck-macos-arm64.dmg release-assets/releases/DeviceDeck-v*-source.zip)
+          test "${#assets[@]}" -eq 2
+          test -f "${assets[0]}" && test -f "${assets[1]}"
           if [[ "$version" =~ (alpha|beta|rc) ]]; then
-            gh release create "$GITHUB_REF_NAME" release-assets/* --verify-tag --prerelease --latest=false --title "DeviceDeck macOS $version" --generate-notes
+            gh release create "$GITHUB_REF_NAME" "${assets[@]}" --verify-tag --prerelease --latest=false --title "DeviceDeck macOS $version" --generate-notes
           else
-            gh release create "$GITHUB_REF_NAME" release-assets/* --verify-tag --latest --title "DeviceDeck macOS $version" --generate-notes
+            gh release create "$GITHUB_REF_NAME" "${assets[@]}" --verify-tag --latest --title "DeviceDeck macOS $version" --generate-notes
           fi
