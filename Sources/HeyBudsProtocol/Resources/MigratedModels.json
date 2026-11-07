@@ -8060,28 +8060,15 @@
       "familyOnly": true
     },
     {
-      "id": "edifier:W820NB-Plus",
-      "name": "W820NB Plus",
-      "brand": "EDIFIER",
-      "protocolFamily": "edifier",
-      "children": [],
-      "function": { "singleBattery": true },
-      "familyOnly": true,
-      "noise": [
-        { "mode": "off", "bytes": [1] },
-        { "mode": "anc", "bytes": [2] },
-        { "mode": "transparency", "bytes": [3] }
-      ]
-    },
-    {
       "id": "edifier:W820NB",
-      "name": "W820NB",
+      "name": "W820NB Plus",
       "brand": "EDIFIER",
       "protocolFamily": "edifier",
       "children": [],
       "function": {
         "singleBattery": true
       },
+      "aliases": ["W820NB"],
       "familyOnly": true,
       "noise": [
         {
