@@ -16,7 +16,7 @@ struct ConnectionTipView:View {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     private var name:String {
-        guard let device else { return "HeyBuds" }
+        guard let device else { return AppIdentity.name }
         return device.id == app.selectedID ? app.title : device.name
     }
     private var deviceModel:DeviceModel? {
@@ -149,7 +149,7 @@ private final class ConnectionNotificationPanel:NSPanel {
         self.deviceID=device?.id; self.preview=preview
         let size=ConnectionTipView.size
         let panel=ConnectionNotificationPanel(contentRect:NSRect(origin:.zero,size:size),styleMask:[.borderless,.nonactivatingPanel],backing:.buffered,defer:false)
-        panel.title="HeyBuds · Connection"; panel.isReleasedWhenClosed=false
+        panel.title="DeviceDeck · Connection"; panel.isReleasedWhenClosed=false
         panel.level = .statusBar; panel.isOpaque=false; panel.backgroundColor = .clear; panel.hasShadow=true
         panel.appearance=app.appearance == "dark" ? NSAppearance(named:.darkAqua) : app.appearance == "light" ? NSAppearance(named:.aqua) : nil
         panel.hidesOnDeactivate=false; panel.isFloatingPanel=true

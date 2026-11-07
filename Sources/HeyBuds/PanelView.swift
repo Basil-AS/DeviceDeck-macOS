@@ -309,7 +309,7 @@ struct PanelView: View {
     }
     private var pageTitle:String {
         switch page {
-        case .home:return "HeyBuds"
+        case .home:return AppIdentity.name
         case .hosts:return L("多设备连接","Connected devices")
         case .device:return L("设备信息","Device info")
         case .advanced:return L("高级功能","Advanced features")
@@ -367,7 +367,7 @@ struct PanelView: View {
                 }
                 Button {
                     guard let model=app.model else { return }
-                    editEQ=EQEditingContext(app:app,entry:CustomEQEntry(name:"HeyBuds",minimum:model.customEQMinimum,maximum:model.customEQMaximum,frequencies:model.customEQFrequencies,gains:Array(repeating:0,count:model.customEQFrequencies.count)))
+                    editEQ=EQEditingContext(app:app,entry:CustomEQEntry(name:"DeviceDeck",minimum:model.customEQMinimum,maximum:model.customEQMaximum,frequencies:model.customEQFrequencies,gains:Array(repeating:0,count:model.customEQFrequencies.count)))
                 } label: {
                     Label(L("新建自定义 EQ","Create custom EQ"),systemImage:"plus")
                 }.disabled(app.operationBusy || app.state.customEQ.count >= (app.model?.customEQMax ?? 0))
@@ -555,7 +555,7 @@ struct PanelView: View {
                 Divider()
                 settingToggle(L("断线自动重连","Reconnect automatically"),isOn:$app.autoReconnect)
                 Divider()
-                settingToggle(L("后台运行","Background mode"),helpText:L("未连接已识别耳机时隐藏图标，重新打开 HeyBuds 可进入设置。","Hide the icon when no recognized earbuds are connected. Reopen HeyBuds to access settings."),isOn:$app.backgroundMode)
+                settingToggle(L("后台运行","Background mode"),helpText:L("未连接已识别设备时隐藏图标，重新打开 DeviceDeck 可进入设置。","Hide the icon when no recognized devices are connected. Reopen DeviceDeck to access settings."),isOn:$app.backgroundMode)
                 Divider()
                 settingToggle(L("登录时启动","Launch at login"),isOn:Binding(get:{app.launchAtLogin},set:app.setLogin))
             }.onAppear { app.refreshLoginStatus() }
@@ -751,7 +751,6 @@ struct SettingsActionRow:View {
 
 struct UpdatesSection:View {
     @Bindable var app:AppModel
-    @ViewState private var showingDonation=false
     var body:some View {
         VStack(alignment:.leading,spacing:6) {
             Text(L("关于","About")).font(.system(size:11,weight:.semibold)).foregroundStyle(.secondary).padding(.horizontal,12)
@@ -759,15 +758,6 @@ struct UpdatesSection:View {
                 SettingsActionRow(title:L("检查更新…","Check for updates…"),symbol:"arrow.down.circle",detail:AppIdentity.version) {
                     app.updater.checkForUpdates()
                 }.disabled(!app.updater.canCheckForUpdates).card(verticalPadding:6)
-                Button { showingDonation=true } label: {
-                    HStack(spacing:8) {
-                        Image(systemName:"cup.and.saucer").frame(width:18)
-                        Text(L("请作者喝杯咖啡","Buy the developer a coffee"))
-                        Spacer(minLength:0)
-                        Image(systemName:"chevron.right").font(.system(size:11,weight:.medium)).foregroundStyle(.secondary)
-                    }.frame(minHeight:30).contentShape(Rectangle())
-                }.buttonStyle(.plain).card(verticalPadding:6)
-                    .popover(isPresented:$showingDonation,arrowEdge:.bottom) { DonationView() }
             }
         }
     }
@@ -798,7 +788,7 @@ struct SettingsFooter:View {
             }
             Button { NSWorkspace.shared.open(AppIdentity.projectURL) } label: {
                 Image(nsImage:Self.githubImage).resizable().scaledToFit().frame(width:16,height:16).frame(width:24,height:28)
-            }.help(L("GitHub 项目","GitHub project")).accessibilityLabel(L("在 GitHub 查看 HeyBuds","View HeyBuds on GitHub"))
+            }.help(L("GitHub 项目","GitHub project")).accessibilityLabel(L("在 GitHub 查看 DeviceDeck","View DeviceDeck on GitHub"))
             Button { app.exportDiagnostics() } label: {
                 Image(systemName:"stethoscope").font(.system(size:13)).frame(width:24,height:28)
             }.help(L("导出诊断…","Export diagnostics…")).accessibilityLabel(L("导出诊断","Export diagnostics"))
@@ -813,7 +803,7 @@ private struct LicenseInfo:View {
     var body:some View {
         VStack(alignment:.leading,spacing:10) {
             Text(L("开源许可","Open-source license")).font(.headline)
-            Text(L("HeyBuds 代码采用 GPL-3.0-or-later。包含的第三方组件及其版权归属见第三方声明，组合发行适用 GPL 第 3 版。软件不提供担保；你可以按许可证条款复制、修改与再分发。","HeyBuds code is licensed under GPL-3.0-or-later. See the third-party notices for component copyrights; the combined distribution is under GPL version 3. This software comes without warranty. You may copy, modify and redistribute it under the license terms."))
+            Text(L("DeviceDeck 代码采用 GPL-3.0-or-later。包含的第三方组件及其版权归属见第三方声明，组合发行适用 GPL 第 3 版。软件不提供担保；你可以按许可证条款复制、修改与再分发。","DeviceDeck code is licensed under GPL-3.0-or-later. See the third-party notices for component copyrights; the combined distribution is under GPL version 3. This software comes without warranty. You may copy, modify and redistribute it under the license terms."))
                 .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal:false,vertical:true)
             HStack {
                 Button(L("完整许可","Full license")) { openNotice("LICENSE") }
@@ -826,50 +816,6 @@ private struct LicenseInfo:View {
         let url=local.flatMap { FileManager.default.fileExists(atPath:$0.path) ? $0 : nil }
             ?? AppIdentity.projectURL.appendingPathComponent("blob/main/"+name)
         NSWorkspace.shared.open(url)
-    }
-}
-
-struct DonationView:View {
-    @ViewState private var selection:DonationOption
-    private static let codes:[URL:CGImage]=Dictionary(uniqueKeysWithValues:DonationOption.options.compactMap { option in
-        option.makeQRCode().map { (option.codeURL,$0) }
-    })
-    init(selection:DonationOption=DonationOption.options[1]) {
-        _selection=State(initialValue:selection)
-    }
-    var body:some View {
-        VStack(spacing:12) {
-            Text(L("请作者喝杯咖啡","Buy the developer a coffee")).font(.headline)
-                .frame(maxWidth:.infinity,alignment:.leading)
-            HStack(spacing:5) {
-                ForEach(DonationOption.options) { option in
-                    Button { selection=option } label: {
-                        Text(option.label).font(.system(size:12,weight:.medium)).monospacedDigit()
-                            .fixedSize().frame(maxWidth:.infinity,minHeight:28).padding(.horizontal,5)
-                    }.buttonStyle(.plain)
-                        .background(selection == option ? Color.accentColor.opacity(0.14) : Color.secondary.opacity(0.08),in:RoundedRectangle(cornerRadius:8))
-                        .overlay(RoundedRectangle(cornerRadius:8).strokeBorder(selection == option ? Color.accentColor : .clear,lineWidth:1))
-                        .accessibilityAddTraits(selection == option ? [.isSelected] : [])
-                }
-            }
-            if let image=Self.codes[selection.codeURL] {
-                Image(image,scale:1,label:Text(L("支付宝收款码，","Alipay payment QR code, ")+selection.label))
-                    .interpolation(.none).resizable().scaledToFit()
-                    .frame(width:222,height:222).background(.white)
-            } else {
-                ContentUnavailableView(L("收款码暂不可用","Payment code unavailable"),systemImage:"qrcode")
-                    .frame(height:222)
-            }
-            VStack(spacing:4) {
-                Text(selection.label).font(.system(size:16,weight:.semibold)).monospacedDigit()
-                Text(L("请使用支付宝扫一扫","Scan with the Alipay app"))
-                    .font(.callout).foregroundStyle(.secondary)
-                if selection.amount == nil {
-                    Text(L("扫码后输入想支持的金额","Enter your preferred amount after scanning"))
-                        .font(.caption).foregroundStyle(.secondary)
-                }
-            }
-        }.padding(16).frame(width:300)
     }
 }
 

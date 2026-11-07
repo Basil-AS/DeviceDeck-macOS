@@ -1,15 +1,15 @@
 import AppKit
 import Foundation
 
-// Reuse the exact system asset used by EarbudIcon.pair in the menu bar.
+// Create a neutral DeviceDeck headphones icon, independent of any vendor app.
 // Usage: xcrun swift make-icon.swift <iconset-directory> [--export <review-directory>]
 let args = CommandLine.arguments
 precondition(args.count >= 2, "Expected an iconset output directory")
 let output = URL(fileURLWithPath:args[1],isDirectory:true)
 try FileManager.default.createDirectory(at:output,withIntermediateDirectories:true)
-let symbolName = "airpods.pro"
-guard let original = NSImage(systemSymbolName:symbolName,accessibilityDescription:"HeyBuds") else {
-    fatalError("The menu bar asset airpods.pro is unavailable; no replacement artwork will be drawn")
+let symbolName = "headphones"
+guard let original = NSImage(systemSymbolName:symbolName,accessibilityDescription:"DeviceDeck") else {
+    fatalError("The system headphones symbol is unavailable")
 }
 let configuration = NSImage.SymbolConfiguration(pointSize:512,weight:.regular)
     .applying(NSImage.SymbolConfiguration(paletteColors:[.white]))
@@ -24,10 +24,10 @@ func bitmap(_ size:Int, foregroundOnly:Bool=false, backgroundOnly:Bool=false) ->
     context.cgContext.clear(CGRect(x:0,y:0,width:size,height:size))
     let s=CGFloat(size)
     if !foregroundOnly {
-        // Keep the original background geometry, colors and gradient angle verbatim.
         let box=NSRect(x:s*0.07,y:s*0.07,width:s*0.86,height:s*0.86)
         let path=NSBezierPath(roundedRect:box,xRadius:s*0.20,yRadius:s*0.20)
-        NSGradient(starting:NSColor(calibratedRed:0.24,green:0.57,blue:1,alpha:1),ending:NSColor(calibratedRed:0.10,green:0.25,blue:0.73,alpha:1))!.draw(in:path,angle:-60)
+        NSColor(calibratedRed:0.063,green:0.082,blue:0.133,alpha:1).setFill()
+        path.fill()
     }
     if !backgroundOnly {
         let ratio=symbol.size.width/symbol.size.height
@@ -53,10 +53,10 @@ for base in [16,32,128,256,512] {
 if let i=args.firstIndex(of:"--export"), i+1<args.count {
     let review=URL(fileURLWithPath:args[i+1],isDirectory:true)
     try FileManager.default.createDirectory(at:review,withIntermediateDirectories:true)
-    try save(bitmap(1024),review.appendingPathComponent("HeyBuds-1024.png"))
-    try save(bitmap(512),review.appendingPathComponent("HeyBuds-512.png"))
+    try save(bitmap(1024),review.appendingPathComponent("DeviceDeck-1024.png"))
+    try save(bitmap(512),review.appendingPathComponent("DeviceDeck-512.png"))
     try save(bitmap(1024,foregroundOnly:true),review.appendingPathComponent("menu-bar-asset-1024.png"))
     try save(bitmap(1024,backgroundOnly:true),review.appendingPathComponent("original-background-1024.png"))
-    try "{\n  \"source\": \"NSImage(systemSymbolName: airpods.pro)\",\n  \"sameAs\": \"Sources/HeyBuds/PanelView.swift EarbudIcon.pair\",\n  \"redrawn\": false,\n  \"symbolAspectRatio\": \(symbol.size.width/symbol.size.height),\n  \"foregroundCanvasWidthFraction\": 0.57,\n  \"background\": \"original geometry, calibrated RGB colors and -60 degree gradient\"\n}\n".write(to:review.appendingPathComponent("source.json"),atomically:true,encoding:.utf8)
+    try "{\n  \"source\": \"macOS SF Symbol headphones\",\n  \"redrawn\": false,\n  \"symbolAspectRatio\": \(symbol.size.width/symbol.size.height),\n  \"foregroundCanvasWidthFraction\": 0.57,\n  \"background\": \"DeviceDeck midnight slate #101522\"\n}\n".write(to:review.appendingPathComponent("source.json"),atomically:true,encoding:.utf8)
 }
-print("Generated 10 icon representations using the exact menu bar system asset: \(symbolName), aspect \(symbol.size.width/symbol.size.height)")
+print("Generated 10 DeviceDeck icon representations using \(symbolName), aspect \(symbol.size.width/symbol.size.height)")

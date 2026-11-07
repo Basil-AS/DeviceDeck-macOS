@@ -8061,13 +8061,14 @@
     },
     {
       "id": "edifier:W820NB",
-      "name": "W820NB",
+      "name": "W820NB Plus",
       "brand": "EDIFIER",
       "protocolFamily": "edifier",
       "children": [],
       "function": {
         "singleBattery": true
       },
+      "aliases": ["W820NB"],
       "familyOnly": true,
       "noise": [
         {

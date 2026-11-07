@@ -30,6 +30,9 @@ private func hex(_ string:String) -> [UInt8] { string.split(separator:" ").map {
     #expect(c.family(name:"DPD2321A LE") == .vivo)
     #expect(c.family(name:"my Redmi Buds") == .xiaomi)
     #expect(c.family(name:"W820NB Plus") == .edifier)
+    let edifier=try #require(c.model(productID:nil,name:"W820NB Plus"))
+    #expect(edifier.family.transportKinds(for:edifier.name) == ["BLE"])
+    #expect(edifier.noiseOptions.map(\.mode) == [.off,.anc,.transparency])
     #expect(c.family(name:"AirPods Pro") == nil)
     #expect(c.family(name:"Beats Fit Pro") == nil)
     #expect(!c.models.contains { $0.id.hasPrefix("apple:") })
@@ -40,6 +43,14 @@ private func hex(_ string:String) -> [UInt8] { string.split(separator:" ").map {
     #expect(tws3e.function["findDevice"].enabled && tws3e.function["wearDetection"].enabled)
     #expect(!tws3e.supportsGame)
     #expect(tws3e.raw["noiseSuffix"].elements.compactMap(\.int) == [3])
+}
+@Test func edifierCapabilityProbePreservesUnknownD8Bytes() throws {
+    let model=try #require(ModelCatalog().model(productID:nil,name:"W820NB Plus"))
+    var state=DeviceState()
+    #expect(BrandState.apply(BrandFrame(0xD8,[1,2,0x80,0xFE]),model:model,to:&state))
+    #expect(state.edifierCapabilities == [1,2,0x80,0xFE])
+    #expect(state.observedQueries.contains(0xD8))
+    #expect(!BrandState.apply(BrandFrame(0xD8,[1]),model:model,to:&state))
 }
 @Test func goldenBrandFramesAndEveryStreamSplit() throws {
     let fixtures:[(EarbudFamily,UInt8,Bool,BrandFrame,[UInt8])]=[

@@ -67,6 +67,9 @@ public struct DeviceState: Sendable {
     public var priorityAddress: [UInt8]?
     public var gestures: [GestureEntry] = []
     public var supportedCommands: Set<UInt16>?
+    /// Raw Edifier D8 capability payload. Preserve unknown bits for diagnostics
+    /// instead of interpreting undocumented fields as enabled controls.
+    public var edifierCapabilities: [UInt8]?
     public var observedQueries: Set<UInt16> = []
     public init() {}
 

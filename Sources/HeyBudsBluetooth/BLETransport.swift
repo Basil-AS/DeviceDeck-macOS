@@ -12,6 +12,9 @@ public struct BLEControlProfile:Sendable {
     public static let oppo=BLEControlProfile(service:"0000079A-D102-11E1-9B23-00025B00A5A5",write:"0100079A-D102-11E1-9B23-00025B00A5A5",notify:"0200079A-D102-11E1-9B23-00025B00A5A5",bmapSegmentation:false)
     public static let jbl=BLEControlProfile(service:JBLProfile.service,write:JBLProfile.write,notify:JBLProfile.notify,bmapSegmentation:false)
     public static let xiaomi=BLEControlProfile(service:XiaomiProfile.bleService,write:XiaomiProfile.bleWrite,notify:XiaomiProfile.bleNotify,bmapSegmentation:false)
+    /// Community-documented W820NB family GATT service. Keep this profile
+    /// name-gated until the endpoint is verified on additional Edifier models.
+    public static let edifier=BLEControlProfile(service:"48093801-1A48-11E9-AB14-D663BD873D93",write:"48093803-1A48-11E9-AB14-D663BD873D93",notify:"48093802-1A48-11E9-AB14-D663BD873D93",bmapSegmentation:false)
     public static let bose=BLEControlProfile(service:"0000FEBE-0000-1000-8000-00805F9B34FB",write:"C65B8F2F-AEE2-4C89-B758-BC4892D6F2D8",notify:"C65B8F2F-AEE2-4C89-B758-BC4892D6F2D8",bmapSegmentation:true)
 }
 

@@ -9,9 +9,9 @@ swift build -c "$config" --arch arm64 --product HeyBuds \
   -Xlinker -platform_version -Xlinker macos -Xlinker 15.0 -Xlinker "$sdk_version"
 bin_dir=$(swift build -c "$config" --arch arm64 --show-bin-path)
 mkdir -p dist
-stage=$(mktemp -d "$PWD/dist/.HeyBuds-build.XXXXXX")
+stage=$(mktemp -d "$PWD/dist/.DeviceDeck-build.XXXXXX")
 trap 'rm -rf "$stage"' EXIT
-app="$stage/HeyBuds.app"
+app="$stage/DeviceDeck.app"
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
 cp "$bin_dir/HeyBuds" "$app/Contents/MacOS/HeyBuds"
 if [[ "$config" == release ]]; then xcrun strip -S -x "$app/Contents/MacOS/HeyBuds"; fi
@@ -21,7 +21,6 @@ mkdir -p "$app/Contents/Resources/HeyBuds_HeyBuds.bundle/Contents/Resources"
 cp "$bin_dir/HeyBuds_HeyBuds.bundle/Contents/Info.plist" "$app/Contents/Resources/HeyBuds_HeyBuds.bundle/Contents/"
 cp Sources/HeyBuds/Resources/GitHub.pdf "$app/Contents/Resources/HeyBuds_HeyBuds.bundle/Contents/Resources/"
 mkdir -p "$app/Contents/Frameworks"
-ditto .build/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework "$app/Contents/Frameworks/Sparkle.framework"
 # Keep the source catalogs readable; ship equivalent compact JSON in the app.
 python3 - "$app/Contents/Resources/HeyBuds_HeyBudsProtocol.bundle" <<'PY'
 import json
@@ -41,10 +40,10 @@ assert seen == sources.keys(), 'Missing runtime catalog'
 PY
 cp LICENSE THIRD_PARTY_NOTICES.md "$app/Contents/Resources/"
 cp -R Licenses "$app/Contents/Resources/"
-xcrun swift scripts/make-icon.swift "$stage/HeyBuds.iconset"
-iconutil -c icns "$stage/HeyBuds.iconset" -o "$app/Contents/Resources/HeyBuds.icns"
+xcrun swift scripts/make-icon.swift "$stage/DeviceDeck.iconset"
+iconutil -c icns "$stage/DeviceDeck.iconset" -o "$app/Contents/Resources/DeviceDeck.icns"
 # Recompress PNG streams losslessly; keep every icon size, pixel and metadata chunk.
-python3 - "$app/Contents/Resources/HeyBuds.icns" <<'PY'
+python3 - "$app/Contents/Resources/DeviceDeck.icns" <<'PY'
 from pathlib import Path
 import struct
 import sys
@@ -92,40 +91,33 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
-<key>CFBundleIdentifier</key><string>local.heybuds.app</string>
+<key>CFBundleIdentifier</key><string>app.devicedeck.macos</string>
 <key>CFBundleExecutable</key><string>HeyBuds</string>
-<key>CFBundleName</key><string>HeyBuds</string>
-<key>CFBundleDisplayName</key><string>HeyBuds</string>
+<key>CFBundleName</key><string>DeviceDeck</string>
+<key>CFBundleDisplayName</key><string>DeviceDeck</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>0.6.1-beta.2</string>
-<key>CFBundleVersion</key><string>19</string>
+<key>CFBundleShortVersionString</key><string>0.7.0-alpha.1</string>
+<key>CFBundleVersion</key><string>20</string>
 <key>CFBundleDevelopmentRegion</key><string>zh-Hans</string>
 <key>CFBundleLocalizations</key><array><string>zh-Hans</string><string>en</string></array>
-<key>CFBundleIconFile</key><string>HeyBuds.icns</string>
+<key>CFBundleIconFile</key><string>DeviceDeck.icns</string>
 <key>LSMinimumSystemVersion</key><string>15.0</string>
-<key>SUFeedURL</key><string>https://raw.githubusercontent.com/abaichuan1017/HeyBuds/main/docs/appcast.xml</string>
-<key>SUPublicEDKey</key><string>BsaMQHq82v0/YwPtqwjwuWBvyPjkUjHuk3nQ12sgC3U=</string>
-<key>SURequireSignedFeed</key><true/>
-<key>SUVerifyUpdateBeforeExtraction</key><true/>
-<key>SUEnableAutomaticChecks</key><false/>
-<key>SUAllowsAutomaticUpdates</key><false/>
-<key>SUSendProfileInfo</key><false/>
 <key>LSUIElement</key><true/>
 <key>NSHighResolutionCapable</key><true/>
-<key>NSBluetoothAlwaysUsageDescription</key><string>HeyBuds 通过蓝牙读取耳机电量，并控制降噪和音效。
+<key>NSBluetoothAlwaysUsageDescription</key><string>DeviceDeck 通过蓝牙读取设备状态并控制支持的功能。
 
-HeyBuds uses Bluetooth to read earbud battery levels and control noise cancellation and sound.</string>
-<key>NSHumanReadableCopyright</key><string>HeyBuds contributors. GPL-3.0-or-later. Includes attributed third-party code.</string>
+DeviceDeck uses Bluetooth to read device status and control supported features.</string>
+<key>NSHumanReadableCopyright</key><string>DeviceDeck contributors. GPL-3.0-or-later. Includes attributed third-party code.</string>
 </dict></plist>
 PLIST
 plutil -lint "$app/Contents/Info.plist"
-codesign --force --sign "${HEYBUDS_SIGN_IDENTITY:--}" --identifier local.heybuds.app "$app"
+codesign --force --sign "${DEVICEDECK_SIGN_IDENTITY:--}" --identifier app.devicedeck.macos "$app"
 codesign --verify --strict "$app"
 test "$(lipo -archs "$app/Contents/MacOS/HeyBuds")" = arm64
-if [[ -e dist/HeyBuds.app ]]; then
+if [[ -e dist/DeviceDeck.app ]]; then
   mkdir -p dist/backups
-  mv dist/HeyBuds.app "dist/backups/HeyBuds-$(date +%Y%m%d-%H%M%S)-$$.app"
+  mv dist/DeviceDeck.app "dist/backups/DeviceDeck-$(date +%Y%m%d-%H%M%S)-$$.app"
 fi
-mv "$app" dist/HeyBuds.app
-python3 scripts/disk_image.py dist/HeyBuds.app dist/HeyBuds-arm64.dmg
-echo "Built: $PWD/dist/HeyBuds.app"
+mv "$app" dist/DeviceDeck.app
+python3 scripts/disk_image.py dist/DeviceDeck.app dist/DeviceDeck-macos-arm64.dmg
+echo "Built: $PWD/dist/DeviceDeck.app"
