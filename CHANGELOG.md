@@ -7,6 +7,15 @@
 - Add initial Baseus Bass EP10 Pro SPP support on macOS: query left/right battery and noise mode; set Off, ANC, and Transparency with ACK plus state readback. Protocol source is the user-supplied Baseus Intelligent 2.18.0 APK; physical-device validation is still required.
 - 在 macOS 新增 Baseus Bass EP10 Pro 的初步 SPP 支持：读取左右耳电量和降噪模式；切换关闭、降噪、通透，并检查确认及状态回读。协议依据为用户提供的 Baseus Intelligent 2.18.0 APK；仍需实机验证。
 
+## 0.7.0-alpha.5 — 2026-11-08
+
+- Add Baseus Bowie MF1 left/right battery reading over RFCOMM/SPP in the unified DeviceDeck app. No undocumented noise-mode controls are shown. Physical-device verification remains pending.
+- Add the Baseus Bowie 30 ANC environments and preserve its BLE controls in the same app; add catalog aliases for EP10 Pro and Bowie MF1.
+- macOS tests, source audit, app/DMG verification, and public source packaging run in CI. New Baseus device paths remain unverified on physical hardware.
+- В едином приложении DeviceDeck добавлено чтение заряда левого и правого наушников Baseus Bowie MF1 через RFCOMM/SPP. Неподтверждённые команды управления режимами не показываются; требуется проверка на устройстве.
+- Добавлены режимы ANC Baseus Bowie 30, а также варианты названий EP10 Pro и Bowie MF1 в каталоге. Управление Bowie 30 использует тот же BLE-профиль DeviceDeck.
+- CI проверяет тесты, исходники, приложение и DMG; новые функции Baseus пока не проверены на реальных устройствах.
+
 ## 0.7.0-alpha.4 — 2026-11-08
 
 - Add Edifier W820NB Plus low-latency game-mode control, gated by the device's D8 capability response and confirmed by a separate state query after writes. Hardware behavior remains unverified.
