@@ -26,6 +26,16 @@
       "aliases": ["Bowie MF1"],
       "function": { "singleBattery": false },
       "noise": []
+    },
+    {
+      "id": "baseus:blade-2",
+      "name": "Baseus Blade 2",
+      "brand": "Baseus",
+      "protocolFamily": "baseus",
+      "children": [],
+      "aliases": ["Blade 2", "Baseus Blade 2-140", "Blade 2-140"],
+      "function": { "powerAccessory": true },
+      "noise": []
     }
   ]
 }

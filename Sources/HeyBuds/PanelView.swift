@@ -31,6 +31,9 @@ struct PanelView: View {
     @ViewState<CGFloat> private var contentHeight=300
     @ViewState<EQEditingContext?> private var editEQ:EQEditingContext? = nil
     @ViewState<Bool> private var findConfirmation=false
+    @ViewState<String> private var powerDisplayText=""
+    @ViewState<String> private var powerReminderMinutes=""
+    @ViewState<String> private var powerShutdownMinutes=""
     private var maxHeight:CGFloat { max(280,(NSScreen.main?.visibleFrame.height ?? 800)-100) }
     var body:some View {
         ScrollView {
@@ -114,6 +117,9 @@ struct PanelView: View {
     }
     @ViewBuilder private var home:some View {
         if app.ready {
+            if app.model?.id == "baseus:blade-2" {
+                baseusPowerbankCard
+            } else {
             HStack(alignment:.top,spacing:8) {
                 if app.model?.unassignedEarbudBatteries == true {
                     ForEach([UInt8(1),2],id:\.self) { id in
@@ -129,6 +135,7 @@ struct PanelView: View {
                 }
             }.padding(.vertical,6)
             if app.model?.noiseOptions.isEmpty == false { noiseCard }
+            }
             if app.session?.canQuery(Command.hosts) == true || app.features.contains(where:{$0.key == "dual"}) {
                 navRow(L("多设备连接","Connected devices"),symbol:"laptopcomputer.and.iphone",target:.hosts).card()
             }
@@ -144,6 +151,99 @@ struct PanelView: View {
                 }
             }.card()
         }
+    }
+    private var baseusPowerbankCard:some View {
+        VStack(alignment:.leading,spacing:10) {
+            Label(L("Baseus Blade 2 电源数据","Baseus Blade 2 power data"),systemImage:"battery.100percent.bolt")
+                .font(.system(size:13,weight:.semibold))
+            ForEach(Array(app.state.powerAccessory.keys.sorted()),id:\.self) { code in
+                if let reading=app.state.powerAccessory[code],let title=baseusPowerLabel(code) {
+                    HStack(spacing:8) {
+                        Text(title).foregroundStyle(.secondary)
+                        Spacer(minLength:4)
+                        Text(baseusPowerValue(code,reading)).monospacedDigit()
+                    }.font(.system(size:11))
+                }
+            }
+            if app.state.powerAccessory.isEmpty { Text(L("等待设备数据…","Waiting for device telemetry…")).foregroundStyle(.secondary).font(.caption) }
+            Divider()
+            HStack {
+                Text(L("屏幕主题","Screen theme"));Spacer()
+                Picker(L("屏幕主题","Screen theme"),selection:Binding(get:{app.state.powerAccessory[0x20]?.value ?? -1},set:{ value in
+                    guard let index=UInt16(exactly:value) else { return }
+                    app.perform { try await $0.setBaseusPowerTheme(index) }
+                })) {
+                    Text("1").tag(0);Text("2").tag(1);Text("3").tag(2)
+                }.labelsHidden().fixedSize().disabled(app.operationBusy || app.state.powerAccessory[0x20] == nil)
+            }
+            settingToggle(L("屏幕保护","Screen saver"),isOn:Binding(get:{app.state.powerAccessory[0x22]?.value == 1},set:{ value in
+                app.perform { try await $0.setBaseusPowerSaver(value) }
+            })).disabled(app.operationBusy || app.state.powerAccessory[0x22] == nil)
+            HStack(spacing:6) {
+                TextField(L("显示文字","Display text"),text:$powerDisplayText).textFieldStyle(.roundedBorder)
+                    .onSubmit { sendBaseusPowerText() }
+                Button(L("发送","Send"),action:sendBaseusPowerText).disabled(app.operationBusy || powerDisplayText.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty)
+            }
+            powerTimerRow(L("提醒计时 · 分钟","Reminder · min"),code:0x1E,text:Binding(get:{
+                powerReminderMinutes.isEmpty ? app.state.powerAccessory[0x1E].map{String($0.value)} ?? "" : powerReminderMinutes
+            },set:{powerReminderMinutes=$0}))
+            powerTimerRow(L("自动关机 · 分钟","Auto shutdown · min"),code:0x1F,text:Binding(get:{
+                powerShutdownMinutes.isEmpty ? app.state.powerAccessory[0x1F].map{String($0.value)} ?? "" : powerShutdownMinutes
+            },set:{powerShutdownMinutes=$0}))
+        }.card()
+    }
+    private func powerTimerRow(_ title:String,code:UInt16,text:Binding<String>) -> some View {
+        HStack(spacing:8) {
+            Text(title).lineLimit(1)
+            Spacer(minLength:2)
+            TextField("0…1440",text:text).textFieldStyle(.roundedBorder).frame(width:76)
+            Button(L("设置","Set")) {
+                guard let value=UInt16(text.wrappedValue),value <= 1440 else { return }
+                app.perform { try await $0.setBaseusPowerTimer(code,value:value) }
+            }.disabled(app.operationBusy || UInt16(text.wrappedValue).map{$0 <= 1440} != true)
+        }.font(.caption)
+    }
+    private func sendBaseusPowerText() {
+        let value=powerDisplayText
+        app.perform { try await $0.setBaseusPowerText(value) }
+    }
+    private func baseusPowerLabel(_ code:UInt16) -> String? {
+        switch code {
+        case 1...12:
+            let port=(code <= 3 || (7...9).contains(code)) ? "USB-C 1" : "USB-C 2"
+            let direction=code <= 6 ? "OUT" : "IN"
+            return "\(port) \(direction) \(["V","A","W"][Int((code-1)%3)])"
+        case 13:return L("温度","Temperature")
+        case 16:return L("电源状态","Power status")
+        case 17:return L("错误代码","Error code")
+        case 18:return L("协商协议","Negotiated protocol")
+        case 19:return L("模块状态","Module status")
+        case 20:return L("能量","Energy")
+        case 21:return L("剩余时间","Remaining time")
+        case 22:return L("充电时间","Charge time")
+        case 30:return L("提醒计时器","Reminder timer")
+        case 31:return L("自动关闭","Auto shutdown")
+        case 35:return L("模块版本","Module version")
+        case 36:return L("DC 模块版本","DC module version")
+        case 37:return L("电芯温度","Cell temperature")
+        case 38:return L("电芯循环次数","Cell cycles")
+        case 40...45:return L("电芯 \(code-39) 电压","Cell \(code-39) voltage")
+        case 49...54:return L("电芯 \(code-48) 电流","Cell \(code-48) current")
+        default:return nil
+        }
+    }
+    private func baseusPowerValue(_ code:UInt16,_ reading:DevicePowerReading) -> String {
+        if code == 13 || code == 37 { return "\(reading.value-100) °C" }
+        if code == 16 { return String(format:"0x%04X",reading.value) }
+        if code == 18 { return "#\(reading.value)" }
+        if [21,22,30,31].contains(code) { return "\(reading.value) min" }
+        if (40...45).contains(code) { return String(format:"%.2f V",Double(reading.value)/1000) }
+        if (49...54).contains(code) { return String(format:"%.2f A",Double(reading.value)/1000) }
+        if let scaled=reading.scaled {
+            let unit:[String]=code <= 12 ? ["V","A","W"] : []
+            return String(format:"%.2f %@",scaled,unit.isEmpty ? "" : unit[Int((code-1)%3)])
+        }
+        return "\(reading.value)"
     }
     @ViewBuilder private var noiseCard:some View {
         if app.model?.family == .sony {

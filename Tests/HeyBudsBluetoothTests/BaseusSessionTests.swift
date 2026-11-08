@@ -31,6 +31,50 @@ import HeyBudsProtocol
     }
 }
 
+@MainActor private final class BaseusPowerRadio: EarbudTransport {
+    var onEvent:((TransportEvent)->Void)?
+    let label="Mock Baseus BLE"
+    var active=false
+    var packets:[Data]=[]
+    var values:[UInt16:UInt16]=[0x20:1,0x22:0,0x1E:0,0x1F:0,0x23:4]
+    func open() async throws { active=true }
+    func close() { active=false }
+    func send(_ data:Data) async throws {
+        guard active else { throw ProtocolError.disconnected }
+        packets.append(data)
+        let bytes=[UInt8](data)
+        guard bytes.count >= 7,bytes[0] == 0x9A,bytes[1] == 0xAA else { throw ProtocolError.invalidPayload }
+        let code=UInt16(bytes[3]) << 8 | UInt16(bytes[4])
+        if bytes[2] == 0x10 {
+            values[code]=UInt16(bytes[9]) << 8 | UInt16(bytes[10])
+            return
+        }
+        guard bytes[2] == 0x03 else { throw ProtocolError.unsupported }
+        let value=values[code] ?? 0
+        let body:[UInt8]=[0x9A,0xAA,0x03,bytes[3],bytes[4],0,1,UInt8(value >> 8),UInt8(value & 0xFF)]
+        let crc=BaseusPowerCodec.crc16(body)
+        onEvent?(.data(Data(body+[UInt8(crc >> 8),UInt8(crc & 0xFF)])))
+    }
+}
+
+@Test @MainActor func blade2UsesSharedBaseusBLEProfileAndConfirmsSettings() async throws {
+    let radio=BaseusPowerRadio()
+    let session=DeviceSession(transport:radio,name:"Baseus Blade 2",catalog:try ModelCatalog())
+    defer { session.close() }
+    try await session.open()
+    #expect(session.model?.id == "baseus:blade-2")
+    #expect(session.ready)
+    #expect(session.state.powerAccessory[0x23]?.value == 4)
+    #expect(try await session.setBaseusPowerTheme(2) == .confirmed)
+    #expect(session.state.powerAccessory[0x20]?.value == 2)
+    #expect(try await session.setBaseusPowerSaver(true) == .confirmed)
+    #expect(try await session.setBaseusPowerTimer(0x1E,value:45) == .confirmed)
+    #expect(try await session.setBaseusPowerText("DeviceDeck") == .sent)
+    #expect(radio.packets.contains(BaseusPowerCodec.read(0x20)))
+    #expect(radio.packets.contains(BaseusPowerCodec.write(0x20,value:2)))
+    #expect(String(decoding:radio.packets.last!,as:UTF8.self).contains("DeviceDeck"))
+}
+
 @Test @MainActor func bowie30RoutesThroughBaseusBLEProfileAndUsesVendorModeLevel() async throws {
     #expect(BLEControlProfile.baseus.service == "53527AA4-29F7-AE11-4E74-997334782568")
     #expect(BLEControlProfile.baseus.write == "EE684B1A-1E9B-ED3E-EE55-F894667E92AC")
@@ -103,5 +147,21 @@ import HeyBudsProtocol
         #expect(try await session.setNoise(.anc) == .confirmed)
         #expect(session.state.noise == .anc)
         #expect(Array(radio.packets.suffix(2)) == [Data([0xBA, 0x34, 1, 101]), Data([0xBA, 0x33])])
+    }
+}
+
+@Suite("Baseus Blade 2 power accessory packets") struct BaseusPowerCodecTests {
+    @Test func readWriteTextAndStreamDecoderUseTheAppCRC() throws {
+        #expect(BaseusPowerCodec.crc16(Array("123456789".utf8)) == 0x4B37)
+        #expect(BaseusPowerCodec.read(0x20) == Data([0x9A,0xAA,0x03,0,0x20,0,1,0x09,0xBD]))
+        let write=BaseusPowerCodec.write(0x20,value:2)
+        #expect(write.count == 13)
+        #expect(try BaseusPowerCodec.writeText("DeviceDeck").count == 21)
+        var codec=BaseusPowerCodec()
+        let reply=[UInt8]([0x9A,0xAA,0x03,0,0x20,0,1,0,2])
+        let crc=BaseusPowerCodec.crc16(reply)
+        let frame=Data(reply+[UInt8(crc >> 8),UInt8(crc & 0xFF)])
+        #expect(codec.feed(frame.prefix(4)).isEmpty)
+        #expect(codec.feed(frame.suffix(from:4)) == [BaseusPowerFrame(status:DevicePowerReading(multiplier:1,value:2),code:0x20)])
     }
 }

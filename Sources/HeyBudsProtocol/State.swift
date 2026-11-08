@@ -9,6 +9,12 @@ public struct BatteryReading: Equatable, Codable, Sendable {
         self.percent = percent; self.charging = charging; self.updatedAt = updatedAt
     }
 }
+public struct DevicePowerReading: Equatable, Sendable {
+    public var multiplier: Int
+    public var value: Int
+    public init(multiplier: Int, value: Int) { self.multiplier=multiplier; self.value=value }
+    public var scaled: Double? { multiplier == 0 ? nil : Double(value) / Double(multiplier) }
+}
 public struct CustomEQEntry: Equatable, Identifiable, Codable, Sendable {
     public var id: UInt8
     public var name: String
@@ -51,6 +57,8 @@ public struct DeviceState: Sendable {
     public var batteries: [BatterySlot:BatteryReading] = [:]
     /// Some protocols identify components without an established left/right map.
     public var unassignedBatteries: [UInt8:BatteryReading] = [:]
+    /// Raw/scaled telemetry reported by Baseus power accessories.
+    public var powerAccessory: [UInt16:DevicePowerReading] = [:]
     public var placement: [BatterySlot:UInt8] = [:]
     public var noise: NoiseMode?
     public var liveNoise: NoiseMode?
