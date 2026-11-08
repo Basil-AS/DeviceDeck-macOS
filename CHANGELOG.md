@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.0-alpha.8 — 2026-11-09
+
+- Enable the existing realme find-device command for Air7 and Air7 Pro in the unified macOS app, based on both models reporting `findDevice` in the vendor catalog. DeviceDeck hardware validation is still required.
+
 ## 0.7.0-alpha.7 — 2026-11-09
 
 - Add DeviceDeck-specific realme Buds Air7/Air7 Pro control profiles in the unified macOS app: battery/status via the existing realme session, ANC levels, preset EQ, game mode, spatial toggle, wear detection, and Air7 multipoint controls. Profile mapping comes from the reviewed Android device catalogue; physical-device command/readback verification is still outstanding. Air7 Pro spatial audio is marked as an inherited known issue and needs macOS verification.
@@ -16,9 +20,6 @@
 ## Unreleased
 
 - Add capability-gated Air 7/Air 7 Pro gesture controls to the unified macOS app using the reviewed Android model mappings. Runtime readback still needs the actual earbuds.
-
-- Enable the existing realme find-device command for Air7 and Air7 Pro in the unified macOS app, based on both models reporting `findDevice` in the vendor catalog. DeviceDeck hardware validation is still required.
-
 ## 0.7.0-alpha.5 — 2026-11-08
 
 - Add Baseus Bowie MF1 left/right battery reading over RFCOMM/SPP in the unified DeviceDeck app. No undocumented noise-mode controls are shown. Physical-device verification remains pending.
