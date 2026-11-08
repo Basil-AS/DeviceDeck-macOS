@@ -99,6 +99,41 @@ import HeyBudsProtocol
     catch { #expect(error as? ProtocolError == .invalidPayload) }
     #expect(s.state.noise == .off)
 }
+@Test @MainActor func edifierGameModeIsCapabilityGatedAndConfirmedByASeparateReadback() async throws {
+    let t=BrandRadio(.edifier),s=DeviceSession(transport:t,name:"W820NB Plus",catalog:try ModelCatalog())
+    defer { s.close() }
+    var gameMode=false
+    t.response={ frame in
+        switch frame.command {
+        case 0xD8:
+            var payload=[UInt8](repeating:0,count:18);payload[17]=0x40
+            return BrandFrame(0xD8,payload)
+        case 0xD0:return BrandFrame(0xD0,[50])
+        case 0xCC:return BrandFrame(0xCC,[1])
+        case 0x08:return BrandFrame(0x08,[gameMode ? 1 : 0])
+        case 0x09:
+            gameMode=frame.payload == [1]
+            return BrandFrame(0x09,frame.payload)
+        default:return nil
+        }
+    }
+    try await s.open();await s.refresh()
+    let feature=try #require(s.gameFeature)
+    #expect(s.canSetFeature(feature))
+    #expect(try await s.setFeature(feature,enabled:true) == .confirmed)
+    #expect(s.state.switches[6] == true)
+    #expect(t.commands.suffix(2).map(\.command) == [0x09,0x08])
+    #expect(t.commands.suffix(2).first?.payload == [1])
+}
+@Test @MainActor func edifierGameModeIsNotQueriedOrWritableWithoutD8Capability() async throws {
+    let t=BrandRadio(.edifier),s=DeviceSession(transport:t,name:"W820NB Plus",catalog:try ModelCatalog())
+    defer { s.close() };try await s.open();await s.refresh()
+    #expect(s.gameFeature == nil)
+    let before=t.commands.count
+    do { _ = try await s.setFeature(FeatureDefinition("game",6),enabled:true);Issue.record("Game write sent without D8 capability") }
+    catch { #expect(error as? ProtocolError == .unsupported) }
+    #expect(!t.commands.dropFirst(before).contains(where:{$0.command == 0x09 || $0.command == 0x08}))
+}
 @Test @MainActor func vivoSetEchoCannotConfirmNoiseWithoutReadback() async throws {
     let t=BrandRadio(.vivo),s=DeviceSession(transport:t,name:"vivo TWS 4",catalog:try ModelCatalog())
     defer { s.close() };try await s.open();await s.refresh()
