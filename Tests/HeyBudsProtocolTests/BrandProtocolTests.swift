@@ -40,7 +40,7 @@ private func hex(_ string:String) -> [UInt8] { string.split(separator:" ").map {
     let bowie30=try #require(c.model(productID:nil,name:"Bowie 30"))
     #expect(bowie30.id == "baseus:bowie-30")
     #expect(bowie30.family.transportKinds(for:bowie30.name) == ["BLE"])
-    #expect(bowie30.noiseOptions.map(\.mode) == [.off,.anc,.transparency])
+    #expect(bowie30.noiseOptions.map(\.mode) == [.off,.smart,.medium,.light,.transparency])
     let edifier=try #require(c.model(productID:nil,name:"W820NB Plus"))
     #expect(edifier.family.transportKinds(for:edifier.name) == ["BLE"])
     #expect(edifier.noiseOptions.map(\.mode) == [.off,.anc,.transparency])

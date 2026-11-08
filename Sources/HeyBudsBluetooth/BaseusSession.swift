@@ -112,7 +112,10 @@ import HeyBudsProtocol
         let mode: NoiseMode
         switch frame.payload[0] {
         case 0: mode = .off
-        case 1: mode = .anc
+        case 1:
+            mode = isBowie30
+                ? ([UInt8(8):NoiseMode.smart,10:.medium,9:.light][frame.payload[1]] ?? .anc)
+                : .anc
         case 2: mode = .transparency
         default:
             state.noise = nil
@@ -148,6 +151,9 @@ import HeyBudsProtocol
             // vendor picker lists Bowie 30 commute mode as 8; EP10 Pro uses 101.
             let defaultLevel: UInt8 = isBowie30 ? 8 : 101
             level = state.noise == .anc ? (noiseType ?? defaultLevel) : defaultLevel
+        case .smart where isBowie30: value = 1; level = 8
+        case .medium where isBowie30: value = 1; level = 10
+        case .light where isBowie30: value = 1; level = 9
         case .transparency: value = 2; level = 0xFF
         default: throw ProtocolError.unsupported
         }

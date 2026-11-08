@@ -10,7 +10,7 @@
 | Xiaomi / Redmi | 16 个精确型号及保留的 1 条系列规则 | 10 款按型号提供 MMA 控制，6 款仅基础信息/电量；旧系列后端独立保留 |
 | EDIFIER | W820NB / W200BT / EDIFIER，共 3 条规则 | SPP 电量及降噪；纯 BLE 型号未接入 |
 | Baseus | Bass EP10 Pro | macOS SPP：电量、ANC/通透；尚未实机验证 |
-| Baseus | Bowie 30 | macOS BLE：电量、降噪状态、关闭/Commute 档 ANC/通透；其他官方降噪环境未接入，尚未实机验证 |
+| Baseus | Bowie 30 | macOS BLE：电量、降噪状态、关闭/通勤/室内/户外降噪/通透；尚未实机验证 |
 | Sony | 12 个型号 | MDR V1/V2、电量、降噪与设备允许的通透参数 |
 | Samsung | 13 个型号 | 新旧两代帧、电量、按型号开放噪声模式与预设 EQ |
 | Google | 2 个型号 | Maestro 电量、降噪、预设 EQ |

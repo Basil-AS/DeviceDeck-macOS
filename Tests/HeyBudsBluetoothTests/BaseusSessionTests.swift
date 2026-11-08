@@ -41,8 +41,15 @@ import HeyBudsProtocol
     try await session.open()
     #expect(session.model?.id == "baseus:bowie-30")
     #expect(session.ready && session.state.noise == .off)
-    #expect(try await session.setNoise(.anc) == .confirmed)
+    #expect(try await session.setNoise(.smart) == .confirmed)
     #expect(radio.packets.suffix(2) == [Data([0xBA, 0x34, 1, 8]), Data([0xBA, 0x33])])
+    #expect(session.state.noise == .smart)
+    #expect(try await session.setNoise(.medium) == .confirmed)
+    #expect(radio.packets.suffix(2) == [Data([0xBA, 0x34, 1, 10]), Data([0xBA, 0x33])])
+    #expect(session.state.noise == .medium)
+    #expect(try await session.setNoise(.light) == .confirmed)
+    #expect(radio.packets.suffix(2) == [Data([0xBA, 0x34, 1, 9]), Data([0xBA, 0x33])])
+    #expect(session.state.noise == .light)
 }
 
 @Suite("Baseus EP10 Pro SPP packets") struct BaseusSessionTests {
