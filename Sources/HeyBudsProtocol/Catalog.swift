@@ -165,7 +165,7 @@ public struct ModelCatalog: Sendable {
             return DeviceModel(raw:entry,id:id,name:name,brand:entry["brand"].text ?? "OPPO",
                 aliases:entry["children"].elements.compactMap { $0["name"].text },noiseOptions:noise,presets:presets)
         }
-        for resource in ["MigratedModels","SonyModels","ExpansionModels","DesktopModels","XiaomiModels"] {
+        for resource in ["MigratedModels","SonyModels","ExpansionModels","DesktopModels","XiaomiModels","DeviceDeckModels"] {
             guard let file=resourceBundle.url(forResource:resource,withExtension:"json") else { throw ProtocolError.invalidPayload }
             let migrated=try decoder.decode(JSONValue.self,from:Data(contentsOf:file))
             for entry in migrated["models"].elements {
@@ -185,6 +185,8 @@ public struct ModelCatalog: Sendable {
                 if names[key] == nil { names[key]=model }
             }
         }
+        // Common short label used on the package and in user-renamed device lists.
+        if let ep10=products["baseus:bass-ep10-pro"] { names[EarbudFamily.normalize("EP10 Pro")]=ep10 }
         byProductID=products; byName=names
         fallbackNames=models.sorted { $0.name.count > $1.name.count }.compactMap { model in
             guard [.vivo,.huawei,.edifier].contains(model.family) else { return nil }

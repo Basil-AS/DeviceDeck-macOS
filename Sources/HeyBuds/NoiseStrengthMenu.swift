@@ -8,6 +8,7 @@ struct NoiseStrengthMenu:NSViewRepresentable {
     let options:[NoiseOption]
     let selection:NoiseMode?
     let enabled:Bool
+    var labels:[NoiseMode:String]=[:]
     let onSelect:(NoiseMode) -> Void
 
     func makeCoordinator() -> Coordinator { Coordinator() }
@@ -31,8 +32,9 @@ struct NoiseStrengthMenu:NSViewRepresentable {
     func updateNSView(_ button:NSButton,context:Context) {
         context.coordinator.options=options
         context.coordinator.selection=selection
+        context.coordinator.labels=labels
         context.coordinator.onSelect=onSelect
-        button.title=noiseLabel(selection ?? .smart)
+        button.title=labels[selection ?? .smart] ?? noiseLabel(selection ?? .smart)
         button.isEnabled=enabled
         button.toolTip=L("选择降噪强度","Choose ANC strength")
         button.setAccessibilityLabel(L("降噪强度","ANC strength"))
@@ -44,6 +46,7 @@ struct NoiseStrengthMenu:NSViewRepresentable {
     final class Coordinator:NSObject {
         var options:[NoiseOption]=[]
         var selection:NoiseMode?
+        var labels:[NoiseMode:String]=[:]
         var onSelect:((NoiseMode) -> Void)?
         @objc func openMenu(_ button:NSButton) {
             guard button.isEnabled else { return }
@@ -52,7 +55,7 @@ struct NoiseStrengthMenu:NSViewRepresentable {
             menu.font = .systemFont(ofSize:14)
             menu.minimumWidth=112
             for (index,option) in options.enumerated() {
-                let item=NSMenuItem(title:noiseLabel(option.mode),action:#selector(choose(_:)),keyEquivalent:"")
+                let item=NSMenuItem(title:labels[option.mode] ?? noiseLabel(option.mode),action:#selector(choose(_:)),keyEquivalent:"")
                 item.target=self
                 item.tag=index
                 item.state=option.mode == selection ? .on : .off

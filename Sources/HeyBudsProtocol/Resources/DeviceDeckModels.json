@@ -1,0 +1,31 @@
+{
+  "source": "DeviceDeck",
+  "models": [
+    {
+      "id": "baseus:bowie-30",
+      "name": "Baseus Bowie 30",
+      "brand": "Baseus",
+      "protocolFamily": "baseus",
+      "children": [],
+      "aliases": ["Bowie 30"],
+      "function": { "singleBattery": false },
+      "noise": [
+        { "mode": "off", "bytes": [0, 255] },
+        { "mode": "smart", "bytes": [1, 8] },
+        { "mode": "medium", "bytes": [1, 10] },
+        { "mode": "light", "bytes": [1, 9] },
+        { "mode": "transparency", "bytes": [2, 255] }
+      ]
+    },
+    {
+      "id": "baseus:bowie-mf1",
+      "name": "Baseus Bowie MF1",
+      "brand": "Baseus",
+      "protocolFamily": "baseus",
+      "children": [],
+      "aliases": ["Bowie MF1"],
+      "function": { "singleBattery": false },
+      "noise": []
+    }
+  ]
+}
