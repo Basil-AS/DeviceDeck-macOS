@@ -85,6 +85,11 @@ public enum WriteOutcome: String, Sendable { case confirmed, sent }
             backend.onChange={ [weak self] in self?.onChange?() }
             backend.onClose={ [weak self] reason in self?.onClose?(reason) }
             backend.onDiagnostic={ [weak self] line in self?.onDiagnostic?(line) }
+        } else if selectedFamily == .baseus {
+            let backend=BaseusSession(transport:transport,name:name,catalog:catalog)
+            additionalSession=backend
+            backend.onChange={ [weak self] in self?.onChange?() }
+            backend.onClose={ [weak self] reason in self?.onClose?(reason) }
         } else if let selectedFamily, selectedFamily != .oppo {
             let backend=BrandSession(transport:transport,name:name,catalog:catalog,family:selectedFamily,overrideID:self.overrideID,localHostAddress:localHostAddress)
             brandSession=backend

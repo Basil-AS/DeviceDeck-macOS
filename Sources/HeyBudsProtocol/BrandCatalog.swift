@@ -2,7 +2,7 @@
 import Foundation
 
 public enum EarbudFamily: String, Codable, CaseIterable, Sendable {
-    case oppo, vivo, huawei, xiaomi, edifier, sony, samsung, google, bose, nothing, soundcore, sennheiser, jbl
+    case oppo, vivo, huawei, xiaomi, edifier, baseus, sony, samsung, google, bose, nothing, soundcore, sennheiser, jbl
     public var allowsModelOverride:Bool { [.oppo,.vivo,.huawei,.xiaomi,.edifier].contains(self) }
     public func transportKinds(for name:String) -> [String] {
         if self == .xiaomi,let profile=XiaomiProfile.named(name) { return profile.transportKinds }
@@ -21,6 +21,7 @@ public enum EarbudFamily: String, Codable, CaseIterable, Sendable {
         if ["huawei","freebuds","freeclip","freearc","freelace","eyewear"].contains(where:n.hasPrefix) { return .huawei }
         if ["xiaomi","redmi","mibuds","mitrue","flipbuds","miair","air2se","air2pro"].contains(where:n.contains) { return .xiaomi }
         if ["edifier","w820nb","w200bt","漫步者"].contains(where:n.contains) { return .edifier }
+        if ["Baseus Bass EP10 Pro", "Bass EP10 Pro"].contains(where: { n == normalize($0) }) { return .baseus }
         if SonyProtocol.profile(name:name) != nil { return .sony }
         if SamsungProfile.named(name) != nil { return .samsung }
         if BoseProfile.named(name) != nil { return .bose }
@@ -51,6 +52,7 @@ public enum EarbudFamily: String, Codable, CaseIterable, Sendable {
         case .huawei:return "00001101-0000-1000-8000-00805F9B34FB"
         case .xiaomi:return "00001101-0000-1000-8000-008584D01810"
         case .edifier:return "EDF00000-EDFE-DFED-FEDF-EDFEDFEDFEDF"
+        case .baseus:return "00001101-0000-1000-8000-00805F9B34FB"
         case .sony:return SonyProtocol.serviceV2
         case .samsung:return SamsungProfile.service
         case .google:return GoogleMaestro.service

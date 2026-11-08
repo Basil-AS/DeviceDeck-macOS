@@ -233,6 +233,10 @@ This list follows the current app catalog. Duplicate display names are merged an
 
 其他 EDIFIER 设备采用系列识别，目前仅接入 SPP 协议。 / Other EDIFIER devices use family detection; only SPP is currently supported.
 
+## Baseus
+
+- Bass EP10 Pro — macOS 初步 SPP 控制：左右耳电量、关闭/ANC/通透。切换后以状态查询回读；协议来源与限制见 [Baseus 说明](licenses/Baseus.md)。尚未实机验证。 / Initial macOS SPP support: left/right battery and Off/ANC/Transparency with state readback. Hardware validation is pending.
+
 ## Xiaomi / Redmi
 
 - Xiaomi Buds 5 Pro（蓝牙版 / Bluetooth edition）
