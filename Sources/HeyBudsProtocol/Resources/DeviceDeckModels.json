@@ -36,6 +36,65 @@
       "aliases": ["Blade 2", "Baseus Blade 2-140", "Blade 2-140"],
       "function": { "powerAccessory": true },
       "noise": []
+    },
+    {
+      "id": "064812",
+      "name": "realme Buds Air7",
+      "brand": "realme",
+      "protocolFamily": "oppo",
+      "override": true,
+      "children": [],
+      "aliases": ["realme Buds 7"],
+      "function": {
+        "wearDetection": 1,
+        "multiDevicesConnect": 1,
+        "dolbyAtmos": 1,
+        "gameMode": 1,
+        "noiseReportModes": {"0":"off","1":"transparency","2":"light","3":"deep","4":"medium","5":"smart"}
+      },
+      "noise": [
+        {"mode":"off","bytes":[1]},
+        {"mode":"transparency","bytes":[2]},
+        {"mode":"light","bytes":[4]},
+        {"mode":"deep","bytes":[8]},
+        {"mode":"medium","bytes":[16]},
+        {"mode":"smart","bytes":[32]}
+      ],
+      "presets": [
+        {"id":103,"zh":"预设 103","en":"EQ 103"},
+        {"id":101,"zh":"预设 101","en":"EQ 101"},
+        {"id":104,"zh":"预设 104","en":"EQ 104"},
+        {"id":102,"zh":"预设 102","en":"EQ 102"}
+      ]
+    },
+    {
+      "id": "064C12",
+      "name": "realme Buds Air7 Pro",
+      "brand": "realme",
+      "protocolFamily": "oppo",
+      "override": true,
+      "children": [],
+      "aliases": ["realme Buds 7 Pro"],
+      "function": {
+        "wearDetection": 1,
+        "dolbyAtmos": 1,
+        "gameMode": 1,
+        "noiseReportModes": {"0":"off","1":"transparency","2":"light","3":"deep","4":"medium","5":"smart"}
+      },
+      "noise": [
+        {"mode":"off","bytes":[1]},
+        {"mode":"transparency","bytes":[2]},
+        {"mode":"light","bytes":[4]},
+        {"mode":"deep","bytes":[8]},
+        {"mode":"medium","bytes":[16]},
+        {"mode":"smart","bytes":[32]}
+      ],
+      "presets": [
+        {"id":103,"zh":"预设 103","en":"EQ 103"},
+        {"id":101,"zh":"预设 101","en":"EQ 101"},
+        {"id":104,"zh":"预设 104","en":"EQ 104"},
+        {"id":102,"zh":"预设 102","en":"EQ 102"}
+      ]
     }
   ]
 }
