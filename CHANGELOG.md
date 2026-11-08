@@ -15,6 +15,8 @@
 
 ## Unreleased
 
+- Enable the existing realme find-device command for Air7 and Air7 Pro in the unified macOS app, based on both models reporting `findDevice` in the vendor catalog. DeviceDeck hardware validation is still required.
+
 ## 0.7.0-alpha.5 — 2026-11-08
 
 - Add Baseus Bowie MF1 left/right battery reading over RFCOMM/SPP in the unified DeviceDeck app. No undocumented noise-mode controls are shown. Physical-device verification remains pending.
