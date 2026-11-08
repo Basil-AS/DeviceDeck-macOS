@@ -62,6 +62,7 @@ private func bytes(_ string:String) -> [UInt8] { string.split(separator:" ").map
     #expect(air.presets.map(\.id) == [103,101,104,102])
     #expect(air.supportsGame && pro.supportsGame && air.gameTypes.isEmpty && pro.gameTypes.isEmpty)
     #expect(air.hasMultiDevice && !pro.hasMultiDevice)
+    #expect(air.function["findDevice"].enabled && pro.function["findDevice"].enabled)
     #expect(air.features.contains(where:{$0.key == "wear"}))
     #expect(air.features.contains(where:{$0.key == "spatialSound"}))
     #expect(catalog.model(productID:nil,name:"realme Buds 7")?.id == "064812")

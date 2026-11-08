@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.0-alpha.8 — 2026-11-09
+
+- Enable the existing realme find-device command for Air7 and Air7 Pro in the unified macOS app, based on both models reporting `findDevice` in the vendor catalog. DeviceDeck hardware validation is still required.
+
 ## 0.7.0-alpha.7 — 2026-11-09
 
 - Add DeviceDeck-specific realme Buds Air7/Air7 Pro control profiles in the unified macOS app: battery/status via the existing realme session, ANC levels, preset EQ, game mode, spatial toggle, wear detection, and Air7 multipoint controls. Profile mapping comes from the reviewed Android device catalogue; physical-device command/readback verification is still outstanding. Air7 Pro spatial audio is marked as an inherited known issue and needs macOS verification.
@@ -12,8 +16,6 @@
 - 在统一的 macOS 应用中接入 Baseus Bowie 30 BLE：读取电量/降噪状态，可切换关闭、通勤/室内/户外降噪和通透，并进行确认及状态回读。实机验证仍待完成。
 - Add initial Baseus Bass EP10 Pro SPP support on macOS: query left/right battery and noise mode; set Off, ANC, and Transparency with ACK plus state readback. Protocol source is the user-supplied Baseus Intelligent 2.18.0 APK; physical-device validation is still required.
 - 在 macOS 新增 Baseus Bass EP10 Pro 的初步 SPP 支持：读取左右耳电量和降噪模式；切换关闭、降噪、通透，并检查确认及状态回读。协议依据为用户提供的 Baseus Intelligent 2.18.0 APK；仍需实机验证。
-
-## Unreleased
 
 ## 0.7.0-alpha.5 — 2026-11-08
 
