@@ -170,7 +170,11 @@ public struct ModelCatalog: Sendable {
             let migrated=try decoder.decode(JSONValue.self,from:Data(contentsOf:file))
             for entry in migrated["models"].elements {
                 guard let model=DeviceModel.migrated(entry) else { throw ProtocolError.invalidPayload }
-                imported.append(model)
+                if entry["override"].enabled,let index=imported.firstIndex(where:{$0.id == model.id}) {
+                    imported[index]=DeviceModel.overlay(model,on:imported[index])
+                } else {
+                    imported.append(model)
+                }
             }
         }
         models=imported
