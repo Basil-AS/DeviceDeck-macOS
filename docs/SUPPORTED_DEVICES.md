@@ -236,7 +236,7 @@ This list follows the current app catalog. Duplicate display names are merged an
 ## Baseus
 
 - Bass EP10 Pro — macOS 初步 SPP 控制：左右耳电量、关闭/ANC/通透。切换后以状态查询回读；协议来源与限制见 [Baseus 说明](licenses/Baseus.md)。尚未实机验证。 / Initial macOS SPP support: left/right battery and Off/ANC/Transparency with state readback. Hardware validation is pending.
-- Bowie 30 — macOS 初步 BLE 控制：电量、噪声状态、关闭/Commute 档 ANC/通透，写入后回读。其他官方降噪环境和实机验证仍待完成。 / Initial macOS BLE support: battery/noise state and Off/Commute ANC/Transparency with readback. Other vendor noise environments and hardware validation remain outstanding.
+- Bowie 30 — macOS 初步 BLE 控制：电量、噪声状态、关闭/通勤/室内/户外降噪/通透，写入后回读。实机验证仍待完成。 / Initial macOS BLE support: battery/noise state and Off/Commute/Indoor/Outdoor ANC/Transparency with readback. Hardware validation remains outstanding.
 
 ## Xiaomi / Redmi
 

@@ -11,7 +11,9 @@
       "function": { "singleBattery": false },
       "noise": [
         { "mode": "off", "bytes": [0, 255] },
-        { "mode": "anc", "bytes": [1, 8] },
+        { "mode": "smart", "bytes": [1, 8] },
+        { "mode": "medium", "bytes": [1, 10] },
+        { "mode": "light", "bytes": [1, 9] },
         { "mode": "transparency", "bytes": [2, 255] }
       ]
     }

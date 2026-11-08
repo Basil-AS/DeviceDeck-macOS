@@ -236,13 +236,18 @@ struct PanelView: View {
         let levels=(app.model?.noiseOptions ?? []).filter { $0.mode.group == .anc }
         let visible=app.state.noise?.group == .anc && levels.count > 1
         return NoiseStrengthMenu(options:levels,selection:app.state.noise,
-            enabled:visible && app.canWrite(Command.setNoise,reading:app.model?.isT500 == true ? nil : Command.noise)) { mode in
+            enabled:visible && app.canWrite(Command.setNoise,reading:app.model?.isT500 == true ? nil : Command.noise),
+            labels:noiseStrengthLabels) { mode in
                 app.perform(noiseControl:true) { try await $0.setNoise(mode) }
             }.frame(maxWidth:.infinity).frame(height:16)
             .opacity(visible ? 1 : 0).allowsHitTesting(visible).accessibilityHidden(!visible)
             .disabled(!visible || !app.canWrite(Command.setNoise,reading:app.model?.isT500 == true ? nil : Command.noise))
             .accessibilityLabel(L("降噪强度","ANC strength"))
-            .accessibilityValue(noiseLabel(app.state.noise ?? .smart))
+            .accessibilityValue(noiseStrengthLabels[app.state.noise ?? .smart] ?? noiseLabel(app.state.noise ?? .smart))
+    }
+    private var noiseStrengthLabels:[NoiseMode:String] {
+        guard app.model?.id == "baseus:bowie-30" else { return [:] }
+        return [.smart:L("通勤","Commute"),.medium:L("室内","Indoor"),.light:L("户外","Outdoor")]
     }
     private var footerHintText:String? {
         if page == .home {
