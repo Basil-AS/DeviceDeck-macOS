@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.7.0-alpha.4 — 2026-11-08
 
 - Add Edifier W820NB Plus low-latency game-mode control, gated by the device's D8 capability response and confirmed by a separate state query after writes. Hardware behavior remains unverified.
 - 新增 Edifier W820NB Plus 游戏模式控制：仅当设备 D8 能力响应声明支持时显示，写入后另行查询状态确认。仍未通过实机验证。
