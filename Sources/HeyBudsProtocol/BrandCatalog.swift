@@ -7,7 +7,8 @@ public enum EarbudFamily: String, Codable, CaseIterable, Sendable {
     public func transportKinds(for name:String) -> [String] {
         if self == .xiaomi,let profile=XiaomiProfile.named(name) { return profile.transportKinds }
         if self == .baseus {
-            return Self.normalize(name).contains("bowie30") ? ["BLE"] : ["RFCOMM"]
+            let normalized=Self.normalize(name)
+            return normalized.contains("bowie30") || normalized.contains("blade2") ? ["BLE"] : ["RFCOMM"]
         }
         if self == .jbl { return JBLProfile.named(name)?.usesBLE == true ? ["BLE"] : ["RFCOMM"] }
         if self == .oppo { return ["RFCOMM","BLE"] }
@@ -24,7 +25,7 @@ public enum EarbudFamily: String, Codable, CaseIterable, Sendable {
         if ["huawei","freebuds","freeclip","freearc","freelace","eyewear"].contains(where:n.hasPrefix) { return .huawei }
         if ["xiaomi","redmi","mibuds","mitrue","flipbuds","miair","air2se","air2pro"].contains(where:n.contains) { return .xiaomi }
         if ["edifier","w820nb","w200bt","漫步者"].contains(where:n.contains) { return .edifier }
-        if ["Baseus Bass EP10 Pro", "Bass EP10 Pro", "Baseus Bowie 30", "Bowie 30", "Baseus Bowie MF1", "Bowie MF1"].contains(where: { n == normalize($0) }) { return .baseus }
+        if ["Baseus Bass EP10 Pro", "Bass EP10 Pro", "Baseus Bowie 30", "Bowie 30", "Baseus Bowie MF1", "Bowie MF1", "Baseus Blade 2", "Blade 2", "Baseus Blade 2-140", "Blade 2-140"].contains(where: { n == normalize($0) }) { return .baseus }
         if SonyProtocol.profile(name:name) != nil { return .sony }
         if SamsungProfile.named(name) != nil { return .samsung }
         if BoseProfile.named(name) != nil { return .bose }
