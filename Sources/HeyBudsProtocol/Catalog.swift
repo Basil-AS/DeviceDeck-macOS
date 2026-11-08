@@ -165,7 +165,7 @@ public struct ModelCatalog: Sendable {
             return DeviceModel(raw:entry,id:id,name:name,brand:entry["brand"].text ?? "OPPO",
                 aliases:entry["children"].elements.compactMap { $0["name"].text },noiseOptions:noise,presets:presets)
         }
-        for resource in ["MigratedModels","SonyModels","ExpansionModels","DesktopModels","XiaomiModels"] {
+        for resource in ["MigratedModels","SonyModels","ExpansionModels","DesktopModels","XiaomiModels","DeviceDeckModels"] {
             guard let file=resourceBundle.url(forResource:resource,withExtension:"json") else { throw ProtocolError.invalidPayload }
             let migrated=try decoder.decode(JSONValue.self,from:Data(contentsOf:file))
             for entry in migrated["models"].elements {
