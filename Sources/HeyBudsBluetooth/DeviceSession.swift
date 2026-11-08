@@ -86,7 +86,9 @@ public enum WriteOutcome: String, Sendable { case confirmed, sent }
             backend.onClose={ [weak self] reason in self?.onClose?(reason) }
             backend.onDiagnostic={ [weak self] line in self?.onDiagnostic?(line) }
         } else if selectedFamily == .baseus {
-            let backend=BaseusSession(transport:transport,name:name,catalog:catalog)
+            let backend:any AdditionalSession = model?.id == "baseus:blade-2"
+                ? BaseusBlade2Session(transport:transport,name:name,catalog:catalog)
+                : BaseusSession(transport:transport,name:name,catalog:catalog)
             additionalSession=backend
             backend.onChange={ [weak self] in self?.onChange?() }
             backend.onClose={ [weak self] reason in self?.onClose?(reason) }
@@ -364,6 +366,22 @@ public enum WriteOutcome: String, Sendable { case confirmed, sent }
             throw ProtocolError.readbackMismatch
         }
         return try await write(Command.setNoise,payload:option.payload,read:Command.noise,readPayload:[1,1]) { $0.noise == mode }
+    }
+    public func setBaseusPowerTheme(_ value:UInt16) async throws -> WriteOutcome {
+        guard let backend=additionalSession as? BaseusBlade2Session else { throw ProtocolError.unsupported }
+        return try await backend.setTheme(value)
+    }
+    public func setBaseusPowerSaver(_ enabled:Bool) async throws -> WriteOutcome {
+        guard let backend=additionalSession as? BaseusBlade2Session else { throw ProtocolError.unsupported }
+        return try await backend.setScreenSaver(enabled)
+    }
+    public func setBaseusPowerTimer(_ code:UInt16,value:UInt16) async throws -> WriteOutcome {
+        guard let backend=additionalSession as? BaseusBlade2Session else { throw ProtocolError.unsupported }
+        return try await backend.setTimer(code,value:value)
+    }
+    public func setBaseusPowerText(_ value:String) async throws -> WriteOutcome {
+        guard let backend=additionalSession as? BaseusBlade2Session else { throw ProtocolError.unsupported }
+        return try await backend.setText(value)
     }
     public func setEQ(_ id:UInt8) async throws -> WriteOutcome {
         if let additionalSession { return try await additionalSession.setEQ(id) }
