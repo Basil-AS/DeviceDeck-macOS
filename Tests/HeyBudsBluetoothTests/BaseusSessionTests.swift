@@ -9,6 +9,7 @@ import HeyBudsProtocol
     var active = false
     var packets: [Data] = []
     var mode: UInt8 = 0
+    var level: UInt8 = 0xFF
     func open() async throws { active = true }
     func close() { active = false }
     func send(_ data: Data) async throws {
@@ -19,14 +20,29 @@ import HeyBudsProtocol
         let reply: [UInt8]
         switch bytes[1] {
         case 0x02: reply = [0xAA, 0x02, 90, 0, 80, 1]
-        case 0x33: reply = [0xAA, 0x33, mode, mode == 1 ? 101 : 0xFF, 0, 0]
+        case 0x33: reply = [0xAA, 0x33, mode, level, 0, 0]
         case 0x34:
             mode = bytes[2]
+            level = bytes[3]
             reply = [0xAA, 0x34, 1]
         default: throw ProtocolError.unsupported
         }
         onEvent?(.data(Data(reply)))
     }
+}
+
+@Test @MainActor func bowie30RoutesThroughBaseusBLEProfileAndUsesVendorModeLevel() async throws {
+    #expect(BLEControlProfile.baseus.service == "53527AA4-29F7-AE11-4E74-997334782568")
+    #expect(BLEControlProfile.baseus.write == "EE684B1A-1E9B-ED3E-EE55-F894667E92AC")
+    #expect(BLEControlProfile.baseus.notify == "654B749C-E37F-AE1F-EBAB-40CA133E3690")
+    let radio = BaseusRadio()
+    let session = DeviceSession(transport: radio, name: "Baseus Bowie 30", catalog: try ModelCatalog())
+    defer { session.close() }
+    try await session.open()
+    #expect(session.model?.id == "baseus:bowie-30")
+    #expect(session.ready && session.state.noise == .off)
+    #expect(try await session.setNoise(.anc) == .confirmed)
+    #expect(radio.packets.suffix(2) == [Data([0xBA, 0x34, 1, 8]), Data([0xBA, 0x33])])
 }
 
 @Suite("Baseus EP10 Pro SPP packets") struct BaseusSessionTests {

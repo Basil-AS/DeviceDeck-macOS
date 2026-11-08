@@ -8108,6 +8108,20 @@
       ]
     },
     {
+      "id": "baseus:bowie-30",
+      "name": "Baseus Bowie 30",
+      "brand": "Baseus",
+      "protocolFamily": "baseus",
+      "children": [],
+      "aliases": ["Bowie 30"],
+      "function": { "singleBattery": false },
+      "noise": [
+        { "mode": "off", "bytes": [0, 255] },
+        { "mode": "anc", "bytes": [1, 8] },
+        { "mode": "transparency", "bytes": [2, 255] }
+      ]
+    },
+    {
       "id": "edifier:W200BT",
       "name": "W200BT",
       "brand": "EDIFIER",

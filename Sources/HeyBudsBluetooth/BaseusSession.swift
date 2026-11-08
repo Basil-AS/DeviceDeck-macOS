@@ -17,8 +17,13 @@ import HeyBudsProtocol
     private var poll: Task<Void, Never>?
     private var noiseType: UInt8?
 
+    private var isBowie30: Bool { model?.id == "baseus:bowie-30" }
+
     init(transport: EarbudTransport, name: String, catalog: ModelCatalog) {
-        model = catalog.models.first { $0.id == "baseus:bass-ep10-pro" }
+        let normalized = EarbudFamily.normalize(name)
+        let modelID: String? = normalized.contains("bowie30") ? "baseus:bowie-30"
+            : ["baseusbassep10pro", "bassep10pro"].contains(normalized) ? "baseus:bass-ep10-pro" : nil
+        model = modelID.flatMap { id in catalog.models.first { $0.id == id } }
         var codec = BaseusFrameCodec()
         channel = ControlChannel(transport: transport, timeout: 2.5,
                                  decode: { codec.feed($0) }, reset: { codec.reset() })
@@ -139,9 +144,10 @@ import HeyBudsProtocol
         case .off: value = 0; level = 0xFF
         case .anc:
             value = 1
-            // Keep the official app's selected ANC environment when possible;
-            // 101 is the app's EP10 Pro default when no ANC environment is stored.
-            level = state.noise == .anc ? (noiseType ?? 101) : 101
+            // Keep the official app's selected environment when possible. The
+            // vendor picker lists Bowie 30 commute mode as 8; EP10 Pro uses 101.
+            let defaultLevel: UInt8 = isBowie30 ? 8 : 101
+            level = state.noise == .anc ? (noiseType ?? defaultLevel) : defaultLevel
         case .transparency: value = 2; level = 0xFF
         default: throw ProtocolError.unsupported
         }
