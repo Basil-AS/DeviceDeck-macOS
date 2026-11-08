@@ -110,7 +110,8 @@ import HeyBudsProtocol
         return features
     }
     var gameFeature:FeatureDefinition? {
-        (model.supportsGame || family == .xiaomi) && state.switches[6] != nil ? FeatureDefinition("game",6) : nil
+        let edifierSupportsGame=family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("gameMode") == true
+        return (model.supportsGame || family == .xiaomi || edifierSupportsGame) && state.switches[6] != nil ? FeatureDefinition("game",6) : nil
     }
     var supportsSpatialAudio:Bool { !model.spatialModes.isEmpty && state.spatial != nil }
     func canQuery(_ command:UInt16) -> Bool {
@@ -120,7 +121,7 @@ import HeyBudsProtocol
         case Command.equalizer:return !model.presets.isEmpty || !model.customEQFrequencies.isEmpty
         case Command.customEQ:return !model.customEQFrequencies.isEmpty
         case Command.spatial:return !model.spatialModes.isEmpty
-        case Command.switches:return !availableFeatures.isEmpty || model.supportsGame || family == .xiaomi
+        case Command.switches:return !availableFeatures.isEmpty || model.supportsGame || family == .xiaomi || (family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("gameMode") == true)
         case Command.hosts:return model.hasMultiDevice
         case Command.wear,Command.firmware:return family == .vivo
         default:return false
@@ -177,7 +178,15 @@ import HeyBudsProtocol
                 try await collectHuaweiHosts();sample.hosts=state.hosts;sample.priorityAddress=state.priorityAddress;sample.observedQueries.insert(Command.hosts)
             default:throw ProtocolError.unsupported
             }
-        case .edifier:sample = try await readRequest(command == Command.battery ? 0xD0 : 0xCC)
+        case .edifier:
+            switch command {
+            case Command.battery:sample = try await readRequest(0xD0)
+            case Command.noise:sample = try await readRequest(0xCC)
+            case Command.switches:
+                guard gameFeature != nil || state.edifierCapabilityReport?.reportedControls.contains("gameMode") == true else { throw ProtocolError.unsupported }
+                sample = try await readRequest(0x08)
+            default:throw ProtocolError.unsupported
+            }
         case .xiaomi:
             if command == Command.battery { sample = try await readRequest(2,payload:[255,255,255,255],sequence:0x0B,accepts:{$0.sequence == 0x0B && $0.payload.starts(with:[2,2,4,7])}) }
             else if command == Command.switches {
@@ -284,6 +293,7 @@ import HeyBudsProtocol
                 case 0x2B10:query=0x2B11
                 case 0x2B6C:query=0x2B6C
                 case 0x2B2E:query=0x2B2F
+                case 0x09 where family == .edifier:query=0x08
                 default:throw ProtocolError.unsupported
                 }
                 sample = try await readRequest(query,payload:family == .huawei ? [query == 0x2B6C ? 2 : 1,0] : [])
@@ -317,6 +327,9 @@ import HeyBudsProtocol
     }
     func setFeature(_ feature:FeatureDefinition,enabled:Bool) async throws -> WriteOutcome {
         guard canSetFeature(feature) else { throw ProtocolError.unsupported }
+        if family == .edifier,feature.key == "game" {
+            return try await confirmedWrite(command:0x09,payload:[enabled ? 1 : 0],read:Command.switches) { $0.switches[feature.switchID] == enabled }
+        }
         if family == .xiaomi {
             let seq=nextSequence();try await send(0xF2,payload:[3,0,47,enabled ? 1 : 0],sequence:seq)
             let token=generation

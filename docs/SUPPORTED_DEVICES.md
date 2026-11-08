@@ -227,6 +227,7 @@ This list follows the current app catalog. Duplicate display names are merged an
 
 ## EDIFIER
 
+- W820NB Plus — 电量、ANC/通透、D8 能力报告；若设备报告支持则提供游戏模式开关。上述控制均待该型号实机与固件验证。 / Battery, ANC/transparency, D8 capability report; game-mode toggle when the device reports support. All controls still need validation on the named model/firmware.
 - W820NB
 - W200BT
 
