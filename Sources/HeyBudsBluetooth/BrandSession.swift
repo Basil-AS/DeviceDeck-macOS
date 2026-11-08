@@ -109,9 +109,12 @@ import HeyBudsProtocol
         if model.function["hearingProtection"].enabled { features.append(FeatureDefinition("hearingProtection",0x70)) }
         return features
     }
+    private var reportsGameMode:Bool {
+        if family == .edifier { return state.edifierCapabilityReport?.reportedControls.contains("gameMode") == true }
+        return model.supportsGame || family == .xiaomi
+    }
     var gameFeature:FeatureDefinition? {
-        let edifierSupportsGame=family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("gameMode") == true
-        return (model.supportsGame || family == .xiaomi || edifierSupportsGame) && state.switches[6] != nil ? FeatureDefinition("game",6) : nil
+        return reportsGameMode && state.switches[6] != nil ? FeatureDefinition("game",6) : nil
     }
     var supportsSpatialAudio:Bool { !model.spatialModes.isEmpty && state.spatial != nil }
     func canQuery(_ command:UInt16) -> Bool {
@@ -121,7 +124,7 @@ import HeyBudsProtocol
         case Command.equalizer:return !model.presets.isEmpty || !model.customEQFrequencies.isEmpty
         case Command.customEQ:return !model.customEQFrequencies.isEmpty
         case Command.spatial:return !model.spatialModes.isEmpty
-        case Command.switches:return !availableFeatures.isEmpty || model.supportsGame || family == .xiaomi || (family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("gameMode") == true)
+        case Command.switches:return !availableFeatures.isEmpty || reportsGameMode
         case Command.hosts:return model.hasMultiDevice
         case Command.wear,Command.firmware:return family == .vivo
         default:return false
