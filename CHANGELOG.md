@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add Baseus Bowie 30 to the unified macOS app over its cataloged BLE profile. Read battery/noise state and set Off, ANC (Commute level), and Transparency with ACK plus state readback. Additional vendor noise environments and hardware validation remain outstanding.
+- 在统一的 macOS 应用中接入 Baseus Bowie 30 BLE：读取电量/降噪状态，可切换关闭、Commute 档降噪和通透，并进行确认及状态回读。其他官方降噪环境和实机验证仍待完成。
 - Add initial Baseus Bass EP10 Pro SPP support on macOS: query left/right battery and noise mode; set Off, ANC, and Transparency with ACK plus state readback. Protocol source is the user-supplied Baseus Intelligent 2.18.0 APK; physical-device validation is still required.
 - 在 macOS 新增 Baseus Bass EP10 Pro 的初步 SPP 支持：读取左右耳电量和降噪模式；切换关闭、降噪、通透，并检查确认及状态回读。协议依据为用户提供的 Baseus Intelligent 2.18.0 APK；仍需实机验证。
 

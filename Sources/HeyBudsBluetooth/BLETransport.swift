@@ -15,6 +15,9 @@ public struct BLEControlProfile:Sendable {
     /// Community-documented W820NB family GATT service. Keep this profile
     /// name-gated until the endpoint is verified on additional Edifier models.
     public static let edifier=BLEControlProfile(service:"48093801-1A48-11E9-AB14-D663BD873D93",write:"48093803-1A48-11E9-AB14-D663BD873D93",notify:"48093802-1A48-11E9-AB14-D663BD873D93",bmapSegmentation:false)
+    /// Baseus Intelligent EU `app_device_ble_config` profile. Device identity and
+    /// command routing remain name-gated; sharing these UUIDs alone is not enough.
+    public static let baseus=BLEControlProfile(service:"53527AA4-29F7-AE11-4E74-997334782568",write:"EE684B1A-1E9B-ED3E-EE55-F894667E92AC",notify:"654B749C-E37F-AE1F-EBAB-40CA133E3690",bmapSegmentation:false)
     public static let bose=BLEControlProfile(service:"0000FEBE-0000-1000-8000-00805F9B34FB",write:"C65B8F2F-AEE2-4C89-B758-BC4892D6F2D8",notify:"C65B8F2F-AEE2-4C89-B758-BC4892D6F2D8",bmapSegmentation:true)
 }
 
