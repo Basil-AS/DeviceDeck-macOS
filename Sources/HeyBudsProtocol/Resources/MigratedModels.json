@@ -8092,6 +8092,22 @@
       ]
     },
     {
+      "id": "baseus:bass-ep10-pro",
+      "name": "Baseus Bass EP10 Pro",
+      "brand": "Baseus",
+      "protocolFamily": "baseus",
+      "children": [],
+      "function": {
+        "singleBattery": false
+      },
+      "aliases": ["Bass EP10 Pro"],
+      "noise": [
+        {"mode": "off", "bytes": [0, 255]},
+        {"mode": "anc", "bytes": [1, 101]},
+        {"mode": "transparency", "bytes": [2, 255]}
+      ]
+    },
+    {
       "id": "edifier:W200BT",
       "name": "W200BT",
       "brand": "EDIFIER",
