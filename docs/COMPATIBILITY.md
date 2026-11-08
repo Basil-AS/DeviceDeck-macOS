@@ -11,6 +11,7 @@
 | EDIFIER | W820NB / W200BT / EDIFIER，共 3 条规则 | SPP 电量及降噪；纯 BLE 型号未接入 |
 | Baseus | Bass EP10 Pro | macOS SPP：电量、ANC/通透；尚未实机验证 |
 | Baseus | Bowie 30 | macOS BLE：电量、降噪状态、关闭/通勤/室内/户外降噪/通透；尚未实机验证 |
+| Baseus | Bowie MF1 | macOS SPP：左右耳电量（BA02）；噪声与手势控制映射尚未确认，不开放；尚未实机验证 |
 | Sony | 12 个型号 | MDR V1/V2、电量、降噪与设备允许的通透参数 |
 | Samsung | 13 个型号 | 新旧两代帧、电量、按型号开放噪声模式与预设 EQ |
 | Google | 2 个型号 | Maestro 电量、降噪、预设 EQ |
@@ -20,7 +21,7 @@
 | Sennheiser | 2 个型号 | GAIA、电量、降噪、EQ、佩戴、设备列表；写入受固件限制 |
 | JBL | 3 个型号 | BLE / RACE 降噪，Wave Buds 2 电量 |
 
-合计 285 条记录，包含产品 ID、显示型号和系列规则，不等于 285 款实机通过。Baseus EP10 Pro 的协议来源与验证边界见 [Baseus provenance](licenses/Baseus.md)。新增 39 款的逐组功能和来源见[桌面项目扩展](DESKTOP_EXPANSION.md)，小米新增 16 款见[Xiaomi / Redmi 支持](XIAOMI_SUPPORT.md)。完整名称见[型号清单](SUPPORTED_DEVICES.md)；机器可读目录可运行 `swift run heybuds-probe catalog` 生成，不在文档中重复存储。
+合计 286 条记录，包含产品 ID、显示型号和系列规则，不等于 286 款实机通过。Baseus EP10 Pro 的协议来源与验证边界见 [Baseus provenance](licenses/Baseus.md)。新增 39 款的逐组功能和来源见[桌面项目扩展](DESKTOP_EXPANSION.md)，小米新增 16 款见[Xiaomi / Redmi 支持](XIAOMI_SUPPORT.md)。完整名称见[型号清单](SUPPORTED_DEVICES.md)；机器可读目录可运行 `swift run heybuds-probe catalog` 生成，不在文档中重复存储。
 
 原始资源与指纹见[上游来源](UPSTREAM.md)。vivo 原表保留在 `docs/reference/VivoDeviceModels.json`，归一化目录保留所有 `sourceEntries`；华为能力来自 `HuaweiModels.cs`。导入工具为 `scripts/import-brand-models.py`。
 
