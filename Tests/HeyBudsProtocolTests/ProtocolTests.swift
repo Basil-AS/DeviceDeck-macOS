@@ -53,6 +53,20 @@ private func bytes(_ string:String) -> [UInt8] { string.split(separator:" ").map
     #expect(pro.presets.map(\.id) == [0,1,2,3,7])
     #expect(pro.spatialModes == [0,1,2])
 }
+@Test func realmeAir7ProfilesOverlayTheVendorCatalogWithDeviceDeckControls() throws {
+    let catalog=try ModelCatalog()
+    let air=try #require(catalog.model(productID:"064812",name:""))
+    let pro=try #require(catalog.model(productID:"064C12",name:""))
+    #expect(air.family == .oppo && pro.family == .oppo)
+    #expect([NoiseMode.off,.transparency,.light,.deep,.medium,.smart].allSatisfy { mode in air.noiseOptions.contains(where:{$0.mode == mode}) })
+    #expect(air.presets.map(\.id) == [103,101,104,102])
+    #expect(air.supportsGame && pro.supportsGame && air.gameTypes.isEmpty && pro.gameTypes.isEmpty)
+    #expect(air.hasMultiDevice && !pro.hasMultiDevice)
+    #expect(air.features.contains(where:{$0.key == "wear"}))
+    #expect(air.features.contains(where:{$0.key == "spatialSound"}))
+    #expect(catalog.model(productID:nil,name:"realme Buds 7")?.id == "064812")
+    #expect(catalog.model(productID:nil,name:"realme Buds 7 Pro")?.id == "064C12")
+}
 @Test func modelSpecificNoiseReadAndWriteMappings() throws {
     let c=try ModelCatalog()
     let air=try #require(c.model(productID:"06C410",name:""))

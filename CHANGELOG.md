@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add DeviceDeck-specific realme Buds Air7/Air7 Pro control profiles in the unified macOS app: battery/status via the existing realme session, ANC levels, preset EQ, game mode, spatial toggle, wear detection, and Air7 multipoint controls. Profile mapping comes from the reviewed Android device catalogue; physical-device command/readback verification is still outstanding. Air7 Pro spatial audio is marked as an inherited known issue and needs macOS verification.
+
 ## 0.7.0-alpha.6 — 2026-11-09
 
 - Add Baseus Blade 2 power telemetry, display theme/saver/text and reminder/shutdown controls to the same macOS DeviceDeck device panel. Numeric settings use readback; display text cannot be confirmed by the observed protocol. Physical-device validation is still required.

@@ -65,7 +65,7 @@ def audit():
     spec.loader.exec_module(importer)
     if overlay != importer.catalog():
         errors.append('EncoDeck X4 catalog differs from its frozen source')
-    if len(original) + len(models) + len(overlay['whiteList']) != 210 or len(sony) != 3 or len(expansion) != 16 or len(desktop) != 39 or len(xiaomi) != 16 or len(devicedeck) != 3:
+    if len(original) + len(models) + len(overlay['whiteList']) != 210 or len(sony) != 3 or len(expansion) != 16 or len(desktop) != 39 or len(xiaomi) != 16 or len(devicedeck) != 5:
         errors.append('Catalog record count changed without updating release scope')
     all_models = original + models + overlay['whiteList'] + sony + expansion + desktop + xiaomi + devicedeck
     if len({m['id'] for m in all_models}) != 287:

@@ -69,6 +69,22 @@ public enum EarbudFamily: String, Codable, CaseIterable, Sendable {
     }
 }
 extension DeviceModel {
+    static func overlay(_ profile:DeviceModel,on base:DeviceModel) -> DeviceModel {
+        var raw=base.raw
+        var object: [String:JSONValue]
+        if case .object(let original)=raw { object=original } else { object=[:] }
+        var function: [String:JSONValue]
+        if case .object(let original)=base.function { function=original } else { function=[:] }
+        if case .object(let additions)=profile.function { function.merge(additions) { _,new in new } }
+        object["function"] = .object(function)
+        object["protocolFamily"] = profile.raw["protocolFamily"]
+        raw = .object(object)
+        return DeviceModel(raw:raw,id:base.id,name:base.name,brand:profile.brand,
+            aliases:Array(Set(base.aliases+profile.aliases)).sorted(),
+            noiseOptions:profile.noiseOptions.isEmpty ? base.noiseOptions : profile.noiseOptions,
+            presets:profile.presets.isEmpty ? base.presets : profile.presets)
+    }
+
     static func migrated(_ entry:JSONValue) -> DeviceModel? {
         guard let id=entry["id"].text, let name=entry["name"].text, let brand=entry["brand"].text else { return nil }
         let noise=entry["noise"].elements.compactMap { node -> NoiseOption? in
