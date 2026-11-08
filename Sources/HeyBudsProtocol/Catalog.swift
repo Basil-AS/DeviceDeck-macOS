@@ -185,6 +185,8 @@ public struct ModelCatalog: Sendable {
                 if names[key] == nil { names[key]=model }
             }
         }
+        // Common short label used on the package and in user-renamed device lists.
+        if let ep10=products["baseus:bass-ep10-pro"] { names[EarbudFamily.normalize("EP10 Pro")]=ep10 }
         byProductID=products; byName=names
         fallbackNames=models.sorted { $0.name.count > $1.name.count }.compactMap { model in
             guard [.vivo,.huawei,.edifier].contains(model.family) else { return nil }

@@ -33,6 +33,7 @@ private func hex(_ string:String) -> [UInt8] { string.split(separator:" ").map {
     #expect(c.family(name:"Baseus Bass EP10 Pro") == .baseus)
     let ep10=try #require(c.model(productID:nil,name:"Bass EP10 Pro"))
     #expect(ep10.id == "baseus:bass-ep10-pro")
+    #expect(c.model(productID:nil,name:"EP10 Pro")?.id == "baseus:bass-ep10-pro")
     #expect(ep10.family.transportKinds(for:ep10.name) == ["RFCOMM"])
     #expect(ep10.family.serviceUUID == "00001101-0000-1000-8000-00805F9B34FB")
     #expect(ep10.noiseOptions.map(\.mode) == [.off,.anc,.transparency])
