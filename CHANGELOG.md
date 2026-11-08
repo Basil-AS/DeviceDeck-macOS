@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0-alpha.9 — 2026-11-09
+
+- Add model-specific gesture action maps for realme Buds Air 7 and Air 7 Pro in the unified macOS app. Exposed actions are limited to those in the reviewed vendor catalog; command behavior and readback still require physical-device validation.
+
+- В едином приложении DeviceDeck для macOS добавлены модельные карты жестов realme Buds Air 7 и Air 7 Pro. Доступны только действия, указанные в изученном каталоге производителя; команды и их подтверждение нужно проверить на реальных наушниках.
+
 ## 0.7.0-alpha.8 — 2026-11-09
 
 - Enable the existing realme find-device command for Air7 and Air7 Pro in the unified macOS app, based on both models reporting `findDevice` in the vendor catalog. DeviceDeck hardware validation is still required.
