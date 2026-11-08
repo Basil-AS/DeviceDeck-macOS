@@ -15,6 +15,8 @@
 
 ## Unreleased
 
+- Add capability-gated Air 7/Air 7 Pro gesture controls to the unified macOS app using the reviewed Android model mappings. Runtime readback still needs the actual earbuds.
+
 - Enable the existing realme find-device command for Air7 and Air7 Pro in the unified macOS app, based on both models reporting `findDevice` in the vendor catalog. DeviceDeck hardware validation is still required.
 
 ## 0.7.0-alpha.5 — 2026-11-08

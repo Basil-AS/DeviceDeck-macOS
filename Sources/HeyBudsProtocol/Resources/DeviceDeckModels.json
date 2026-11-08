@@ -51,6 +51,11 @@
         "multiDevicesConnect": 1,
         "dolbyAtmos": 1,
         "gameMode": 1,
+        "control": [
+          {"ear":2,"action":2,"support":581,"showEar":0},
+          {"ear":2,"action":3,"support":8825,"showEar":0},
+          {"ear":2,"action":11,"minSelectCount":2,"showEar":1}
+        ],
         "noiseReportModes": {"0":"off","1":"transparency","2":"light","3":"deep","4":"medium","5":"smart"}
       },
       "noise": [
@@ -81,6 +86,11 @@
         "findDevice": 1,
         "dolbyAtmos": 1,
         "gameMode": 1,
+        "control": [
+          {"ear":2,"action":2,"support":581,"showEar":0},
+          {"ear":2,"action":3,"support":8801,"showEar":0},
+          {"ear":2,"action":11,"minSelectCount":2,"showEar":1}
+        ],
         "noiseReportModes": {"0":"off","1":"transparency","2":"light","3":"deep","4":"medium","5":"smart"}
       },
       "noise": [
