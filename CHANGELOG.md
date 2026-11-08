@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0-alpha.9 — 2026-11-09
+
+- Add model-specific gesture action maps for realme Buds Air 7 and Air 7 Pro in the unified macOS app. Exposed actions are limited to those in the reviewed vendor catalog; command behavior and readback still require physical-device validation.
+
+- В едином приложении DeviceDeck для macOS добавлены модельные карты жестов realme Buds Air 7 и Air 7 Pro. Доступны только действия, указанные в изученном каталоге производителя; команды и их подтверждение нужно проверить на реальных наушниках.
+
 ## 0.7.0-alpha.8 — 2026-11-09
 
 - Enable the existing realme find-device command for Air7 and Air7 Pro in the unified macOS app, based on both models reporting `findDevice` in the vendor catalog. DeviceDeck hardware validation is still required.
@@ -17,6 +23,9 @@
 - Add initial Baseus Bass EP10 Pro SPP support on macOS: query left/right battery and noise mode; set Off, ANC, and Transparency with ACK plus state readback. Protocol source is the user-supplied Baseus Intelligent 2.18.0 APK; physical-device validation is still required.
 - 在 macOS 新增 Baseus Bass EP10 Pro 的初步 SPP 支持：读取左右耳电量和降噪模式；切换关闭、降噪、通透，并检查确认及状态回读。协议依据为用户提供的 Baseus Intelligent 2.18.0 APK；仍需实机验证。
 
+## Unreleased
+
+- Add capability-gated Air 7/Air 7 Pro gesture controls to the unified macOS app using the reviewed Android model mappings. Runtime readback still needs the actual earbuds.
 ## 0.7.0-alpha.5 — 2026-11-08
 
 - Add Baseus Bowie MF1 left/right battery reading over RFCOMM/SPP in the unified DeviceDeck app. No undocumented noise-mode controls are shown. Physical-device verification remains pending.
