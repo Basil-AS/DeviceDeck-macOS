@@ -21,7 +21,7 @@
 | Sennheiser | 2 个型号 | GAIA、电量、降噪、EQ、佩戴、设备列表；写入受固件限制 |
 | JBL | 3 个型号 | BLE / RACE 降噪，Wave Buds 2 电量 |
 
-合计 286 条记录，包含产品 ID、显示型号和系列规则，不等于 286 款实机通过。Baseus EP10 Pro 的协议来源与验证边界见 [Baseus provenance](licenses/Baseus.md)。新增 39 款的逐组功能和来源见[桌面项目扩展](DESKTOP_EXPANSION.md)，小米新增 16 款见[Xiaomi / Redmi 支持](XIAOMI_SUPPORT.md)。完整名称见[型号清单](SUPPORTED_DEVICES.md)；机器可读目录可运行 `swift run heybuds-probe catalog` 生成，不在文档中重复存储。
+合计 287 条记录，包含产品 ID、显示型号和系列规则，不等于 287 款实机通过。Baseus EP10 Pro 的协议来源与验证边界见 [Baseus provenance](licenses/Baseus.md)。新增 39 款的逐组功能和来源见[桌面项目扩展](DESKTOP_EXPANSION.md)，小米新增 16 款见[Xiaomi / Redmi 支持](XIAOMI_SUPPORT.md)。完整名称见[型号清单](SUPPORTED_DEVICES.md)；机器可读目录可运行 `swift run heybuds-probe catalog` 生成，不在文档中重复存储。
 
 原始资源与指纹见[上游来源](UPSTREAM.md)。vivo 原表保留在 `docs/reference/VivoDeviceModels.json`，归一化目录保留所有 `sourceEntries`；华为能力来自 `HuaweiModels.cs`。导入工具为 `scripts/import-brand-models.py`。
 
