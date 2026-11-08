@@ -16,6 +16,16 @@
         { "mode": "light", "bytes": [1, 9] },
         { "mode": "transparency", "bytes": [2, 255] }
       ]
+    },
+    {
+      "id": "baseus:bowie-mf1",
+      "name": "Baseus Bowie MF1",
+      "brand": "Baseus",
+      "protocolFamily": "baseus",
+      "children": [],
+      "aliases": ["Bowie MF1"],
+      "function": { "singleBattery": false },
+      "noise": []
     }
   ]
 }

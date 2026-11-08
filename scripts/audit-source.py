@@ -65,10 +65,10 @@ def audit():
     spec.loader.exec_module(importer)
     if overlay != importer.catalog():
         errors.append('EncoDeck X4 catalog differs from its frozen source')
-    if len(original) + len(models) + len(overlay['whiteList']) != 210 or len(sony) != 3 or len(expansion) != 16 or len(desktop) != 39 or len(xiaomi) != 16 or len(devicedeck) != 1:
+    if len(original) + len(models) + len(overlay['whiteList']) != 210 or len(sony) != 3 or len(expansion) != 16 or len(desktop) != 39 or len(xiaomi) != 16 or len(devicedeck) != 2:
         errors.append('Catalog record count changed without updating release scope')
     all_models = original + models + overlay['whiteList'] + sony + expansion + desktop + xiaomi + devicedeck
-    if len({m['id'] for m in all_models}) != 285:
+    if len({m['id'] for m in all_models}) != 286:
         errors.append('Duplicate catalog identifiers')
     upstream = json.loads((ROOT / 'docs/upstream-sources.json').read_text())
     resources = upstream['runtimeResourceSHA256'] | upstream['referenceResourceSHA256']
@@ -82,4 +82,4 @@ def audit():
 
 if __name__ == '__main__':
     files, version = audit()
-    print(f'Public source audit passed: DeviceDeck {version}, {len(files)} files, 285 catalog records.')
+    print(f'Public source audit passed: DeviceDeck {version}, {len(files)} files, 286 catalog records.')

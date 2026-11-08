@@ -24,7 +24,7 @@ public enum EarbudFamily: String, Codable, CaseIterable, Sendable {
         if ["huawei","freebuds","freeclip","freearc","freelace","eyewear"].contains(where:n.hasPrefix) { return .huawei }
         if ["xiaomi","redmi","mibuds","mitrue","flipbuds","miair","air2se","air2pro"].contains(where:n.contains) { return .xiaomi }
         if ["edifier","w820nb","w200bt","漫步者"].contains(where:n.contains) { return .edifier }
-        if ["Baseus Bass EP10 Pro", "Bass EP10 Pro", "Baseus Bowie 30", "Bowie 30"].contains(where: { n == normalize($0) }) { return .baseus }
+        if ["Baseus Bass EP10 Pro", "Bass EP10 Pro", "Baseus Bowie 30", "Bowie 30", "Baseus Bowie MF1", "Bowie MF1"].contains(where: { n == normalize($0) }) { return .baseus }
         if SonyProtocol.profile(name:name) != nil { return .sony }
         if SamsungProfile.named(name) != nil { return .samsung }
         if BoseProfile.named(name) != nil { return .bose }
