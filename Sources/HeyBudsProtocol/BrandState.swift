@@ -81,6 +81,7 @@ public enum BrandState {
             if c == 0xD8,p.count >= 2 { state.edifierCapabilities=p;observed=0xD8 }
             else if c == 0xD0,let level=p.first,level <= 100 { setBattery(level,slot:.left,charging:false,state:&state);observed=Command.battery }
             else if c == 0xCC,let mode=p.first,let value=([1:NoiseMode.off,2:.anc,3:.transparency])[Int(mode)] { state.noise=value;observed=Command.noise }
+            else if c == 0x08,let enabled=p.first,enabled <= 1 { state.switches[6]=enabled == 1;observed=Command.switches }
             else { return false }
         case .xiaomi:
             if p.starts(with:[2,2,4,7]),p.count >= 5 {
