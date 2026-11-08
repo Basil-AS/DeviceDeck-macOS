@@ -5,7 +5,7 @@
 - User-supplied Baseus Intelligent 2.18.0 (version code 185), arm64 split bundle.
 - Bundle SHA-256: `c93512f905fca24d401d0c45d8e795a1e37db96864d0489fc051d437a53f4003`.
 - Decompiled sources/resources are kept locally in the umbrella repository under `research/local-evidence/decompiled/baseus/`; the APK and vendor artwork are not redistributed.
-- The findings and model-specific call paths are summarized in [`research/baseus-intelligent-findings.md`](../../../../research/baseus-intelligent-findings.md).
+- The findings and model-specific call paths are summarized in the umbrella repository's [`research/baseus-intelligent-findings.md`](https://github.com/Basil-AS/DeviceDeck/blob/develop/research/baseus-intelligent-findings.md).
 
 ## EP10 Pro support implemented here
 
