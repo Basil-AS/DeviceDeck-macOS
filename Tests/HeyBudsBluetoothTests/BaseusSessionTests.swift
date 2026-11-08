@@ -52,6 +52,21 @@ import HeyBudsProtocol
     #expect(session.state.noise == .light)
 }
 
+@Test @MainActor func bowieMF1UsesOnlyTheBaseusBatteryQueryUntilItsControlsAreMapped() async throws {
+    let radio = BaseusRadio()
+    let session = DeviceSession(transport: radio, name: "Baseus Bowie MF1", catalog: try ModelCatalog())
+    defer { session.close() }
+    try await session.open()
+    #expect(session.model?.id == "baseus:bowie-mf1")
+    #expect(session.ready)
+    #expect(session.state.batteries[.left]?.percent == 90)
+    #expect(session.state.batteries[.right]?.percent == 80)
+    #expect(radio.packets == [Data([0xBA, 0x02])])
+    #expect(session.canQuery(Command.battery))
+    #expect(!session.canQuery(Command.noise))
+    #expect(!session.canWrite(Command.setNoise))
+}
+
 @Suite("Baseus EP10 Pro SPP packets") struct BaseusSessionTests {
     @Test func officialAppCommandsAreBareBaFrames() {
         #expect(BaseusFrameCodec.encode(0x02) == Data([0xBA, 0x02]))

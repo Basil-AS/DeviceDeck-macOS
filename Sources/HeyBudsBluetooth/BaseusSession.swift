@@ -18,10 +18,13 @@ import HeyBudsProtocol
     private var noiseType: UInt8?
 
     private var isBowie30: Bool { model?.id == "baseus:bowie-30" }
+    private var isBowieMF1: Bool { model?.id == "baseus:bowie-mf1" }
+    private var supportsNoise: Bool { !isBowieMF1 }
 
     init(transport: EarbudTransport, name: String, catalog: ModelCatalog) {
         let normalized = EarbudFamily.normalize(name)
         let modelID: String? = normalized.contains("bowie30") ? "baseus:bowie-30"
+            : normalized.contains("bowiemf1") ? "baseus:bowie-mf1"
             : ["baseusbassep10pro", "bassep10pro"].contains(normalized) ? "baseus:bass-ep10-pro" : nil
         model = modelID.flatMap { id in catalog.models.first { $0.id == id } }
         var codec = BaseusFrameCodec()
@@ -47,7 +50,7 @@ import HeyBudsProtocol
         do {
             try await channel.open()
             try await readBattery()
-            _ = try await readNoise()
+            if supportsNoise { _ = try await readNoise() }
             guard generation == token else { throw ProtocolError.disconnected }
             ready = true
             onChange?()
@@ -79,7 +82,7 @@ import HeyBudsProtocol
             defer { operations.release() }
             guard ready else { return }
             try await readBattery()
-            _ = try await readNoise()
+            if supportsNoise { _ = try await readNoise() }
         } catch {
             if ready { close(); onClose?(error.localizedDescription) }
         }
@@ -131,11 +134,11 @@ import HeyBudsProtocol
     }
 
     func canQuery(_ command: UInt16) -> Bool {
-        command == Command.battery || command == Command.noise
+        command == Command.battery || (supportsNoise && command == Command.noise)
     }
 
     func canWrite(_ command: UInt16, reading: UInt16?) -> Bool {
-        ready && command == Command.setNoise &&
+        ready && supportsNoise && command == Command.setNoise &&
             (reading == nil || reading == Command.noise) && state.observedQueries.contains(Command.noise)
     }
 
