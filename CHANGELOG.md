@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.0-alpha.21 — 2026-11-09
+
+- Correct the EDIFIER W820NB Plus voice prompt volume range in the existing DeviceDeck panel to 0–15, matching the supplied Connect APK option list. D8 B17 bit 4 still gates the setting; 0x05 reads, 0x06 writes, and a fresh 0x05 confirms the value. Physical-device verification remains open. This supersedes alpha.20 for this control.
+
 ## 0.7.0-alpha.20 — 2026-11-09
 
 - Add capability-gated EDIFIER W820NB Plus voice prompt volume to the existing DeviceDeck panel. D8 B17 bit 4 gates the control; command 0x05 reads the level, 0x06 sets it within 0–12, and the setting is confirmed by readback. Physical-device verification remains open.
