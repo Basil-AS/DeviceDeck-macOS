@@ -1096,5 +1096,6 @@ func featureLabel(_ key:String) -> String {
 func gestureLabel(_ value:UInt8) -> String { [1:L("单击","Single press"),2:L("双击","Double press"),3:L("三击","Triple press"),4:L("长按","Hold"),5:L("滑动","Swipe")][Int(value)] ?? L("手势 ","Gesture ")+String(value) }
 func actionLabel(_ value:UInt8,family:EarbudFamily?=nil) -> String {
     if family == .xiaomi,let label=[0x30:L("增大音量","Volume up"),0x31:L("减小音量","Volume down"),0x32:L("切换降噪模式","Cycle noise modes")][Int(value)] { return label }
+    if family == .baseus,let label=[1:L("播放／暂停","Play / pause"),2:L("上一首","Previous track"),3:L("下一首","Next track"),4:L("语音助手","Voice assistant"),6:L("切换降噪模式","Cycle noise modes"),11:L("增大音量","Volume up"),12:L("减小音量","Volume down")][Int(value)] { return label }
     return [0:L("无","None"),1:L("播放／暂停","Play / pause"),3:L("语音助手","Voice assistant"),5:L("上一首","Previous track"),6:L("下一首","Next track"),7:L("音量","Volume"),10:L("切换歌曲","Skip track"),17:L("游戏模式","Game mode")][Int(value)] ?? L("操作 ","Action ")+String(value)
 }
