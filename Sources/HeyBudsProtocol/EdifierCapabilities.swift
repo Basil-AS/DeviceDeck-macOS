@@ -50,6 +50,17 @@ public struct EdifierCapabilityReport: Equatable, Sendable {
         return value == 1 ? [0,10,20,30,60,90] : [0,5,15,30,60,180]
     }
 
+    /// Maximum UTF-8 payload accepted by the app's D8 name profile mapping.
+    public var bluetoothNameLimitBytes: Int {
+        switch value(3) {
+        case 1, 6: return 24
+        case 2, 5: return 30
+        case 3: return 29
+        case 4: return 35
+        default: return 0
+        }
+    }
+
     /// Only capabilities explicitly represented by D8 are returned. This is
     /// a device report, not proof that DeviceDeck implements the operation.
     public var reportedControls: [String] {

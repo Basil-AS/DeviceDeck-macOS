@@ -34,6 +34,7 @@ struct PanelView: View {
     @ViewState<String> private var powerDisplayText=""
     @ViewState<String> private var powerReminderMinutes=""
     @ViewState<String> private var powerShutdownMinutes=""
+    @ViewState<String> private var edifierNameDraft=""
     private var maxHeight:CGFloat { max(280,(NSScreen.main?.visibleFrame.height ?? 800)-100) }
     var body:some View {
         ScrollView {
@@ -72,6 +73,7 @@ struct PanelView: View {
         .font(.system(size:13))
         .onChange(of:app.selectedID) { _,_ in page = .home;editEQ=nil }
         .onChange(of:app.sessionID) { _,_ in editEQ=nil }
+        .onChange(of:app.state.edifierBluetoothName) { _,name in if let name { edifierNameDraft=name } }
         .onChange(of:app.state.placement) { _,placement in
             let worn:[UInt8]=app.model?.isT500 == true ? [3] : [3,7]
             if placement.values.contains(where:{worn.contains($0)}) { app.noiseControlHint=nil }
@@ -699,6 +701,20 @@ struct PanelView: View {
                         app.perform { try await $0.setEdifierAutoPowerOff(enabled) }
                     }))
                     .disabled(!app.ready || app.operationBusy)
+                }
+            }
+            if let report=app.state.edifierCapabilityReport,
+               report.reportedControls.contains("setName"),report.bluetoothNameLimitBytes > 0 {
+                settingsGroup(L("设备名称","Device name")) {
+                    if let current=app.state.edifierBluetoothName { Text(L("当前：\(current)","Current: \(current)")).font(.system(size:11)).foregroundStyle(.secondary) }
+                    TextField(L("Bluetooth name","Bluetooth name"),text:$edifierNameDraft)
+                        .textFieldStyle(.roundedBorder)
+                    Text(L("最多 \(report.bluetoothNameLimitBytes) 字节 UTF‑8","Up to \(report.bluetoothNameLimitBytes) UTF‑8 bytes"))
+                        .font(.system(size:10)).foregroundStyle(.tertiary)
+                    Button(L("保存名称","Save name")) {
+                        let name=edifierNameDraft
+                        app.perform { try await $0.setEdifierBluetoothName(name) }
+                    }.disabled(!app.ready || app.operationBusy || edifierNameDraft.utf8.count > report.bluetoothNameLimitBytes || edifierNameDraft.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty)
                 }
             }
             if hasEarbudControls {

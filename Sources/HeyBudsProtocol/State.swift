@@ -87,6 +87,8 @@ public struct DeviceState: Sendable {
     public var edifierSleepTimerMinutes: UInt16?
     /// Auto power-off when no audio is playing, queried with Edifier D7.
     public var edifierAutoPowerOff: Bool?
+    /// Bluetooth name returned by the Edifier C9 query.
+    public var edifierBluetoothName: String?
     public var edifierCapabilityReport: EdifierCapabilityReport? {
         guard let edifierCapabilities else { return nil }
         return EdifierCapabilityReport(payload: edifierCapabilities)
