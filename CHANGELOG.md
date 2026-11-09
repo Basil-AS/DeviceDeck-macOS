@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.0-alpha.15 — 2026-11-09
+
+- Add capability-gated W820NB Plus Bluetooth name display and rename in the existing DeviceDeck macOS panel. D8 gates C9 reads and CA writes; enforce the reported UTF-8 byte limit and verify with C9 readback.
+- Physical-device behavior and reconnect persistence remain unverified.
+
 ## 0.7.0-alpha.14 — 2026-11-09
 
 - Add Edifier W820NB Plus no-audio auto power-off to the unified DeviceDeck macOS controls. D8 gates the setting, D7 reads it, and D6 writes followed by D7 readback.
