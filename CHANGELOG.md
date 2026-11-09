@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.0-alpha.14 — 2026-11-09
+
+- Add Edifier W820NB Plus no-audio auto power-off to the unified DeviceDeck macOS controls. D8 gates the setting, D7 reads it, and D6 writes followed by D7 readback.
+- Physical-device behavior and reconnect persistence still need verification.
+
 ## 0.7.0-alpha.13 — 2026-11-09
 
 - Add Baseus EP10 Pro gesture assignment controls to the unified DeviceDeck macOS app. Configure the Normal/ANC/Transparency choices for “Cycle noise modes”; BA8E readback confirms BA8F writes.
