@@ -16,7 +16,7 @@ import HeyBudsProtocol
     private var generation = UUID()
     private var poll: Task<Void, Never>?
     private var noiseType: UInt8?
-    private var supportsGestures: Bool { model?.id == "baseus:bass-ep10-pro" }
+    private var supportsGestures: Bool { model?.id == "baseus:bass-ep10-pro" || isBowieMF1 }
     private let gestureLayouts: [(UInt8, UInt8)] = [(3, 1), (0, 2), (1, 3), (2, 4)]
 
     private var isBowie30: Bool { model?.id == "baseus:bowie-30" }
@@ -150,6 +150,10 @@ import HeyBudsProtocol
     }
 
     private func readGestures() async throws {
+        if isBowieMF1 {
+            for layout: UInt8 in [0, 2, 1] { try await readMF1GestureLayout(layout) }
+            return
+        }
         var entries: [GestureEntry] = []
         for button: UInt8 in 0...1 {
             let frame = try await request(0x8C, payload: [button, 0xFF])
@@ -168,6 +172,10 @@ import HeyBudsProtocol
     }
 
     func gestureActions(_ entry: GestureEntry) -> [UInt8] {
+        if isBowieMF1 {
+            guard entry.mode == 1, (1...2).contains(entry.side), (2...4).contains(entry.gesture) else { return [] }
+            return entry.gesture == 3 ? [4, 5] : [11, 12, 1, 2, 3, 4, 0]
+        }
         guard supportsGestures, entry.mode == 1, (1...2).contains(entry.side),
               gestureLayouts.contains(where: { $0.1 == entry.gesture }) else { return [] }
         return entry.gesture == 1 ? [0, 1] : [0, 1, 2, 3, 4, 6, 11, 12]
@@ -175,8 +183,23 @@ import HeyBudsProtocol
 
     func setGesture(_ entry: GestureEntry, action: UInt8) async throws -> WriteOutcome {
         guard canWrite(Command.setGestures, reading: Command.gestures), gestureActions(entry).contains(action),
-              let layout = gestureLayouts.first(where: { $0.1 == entry.gesture })?.0,
               state.gestures.contains(where: { $0.id == entry.id }) else { throw ProtocolError.unsupported }
+        if isBowieMF1 {
+            guard let layout: UInt8 = [2:0, 3:1, 4:2][entry.gesture] else { throw ProtocolError.unsupported }
+            try await operations.acquire()
+            defer { operations.release() }
+            let existing = state.gestures.filter { $0.gesture == entry.gesture }
+            guard let left = existing.first(where: { $0.side == 1 })?.action,
+                  let right = existing.first(where: { $0.side == 2 })?.action else { throw ProtocolError.invalidPayload }
+            let nextLeft = entry.side == 1 ? action : left
+            let nextRight = entry.side == 2 ? action : right
+            let ack = try await request(0x22, payload: [layout, nextLeft, nextRight])
+            guard ack.payload.first == 1 else { throw ProtocolError.rejected(ack.payload.first ?? 0) }
+            try await readMF1GestureLayout(layout)
+            guard state.gestures.first(where: { $0.id == entry.id })?.action == action else { throw ProtocolError.readbackMismatch }
+            return .confirmed
+        }
+        guard let layout = gestureLayouts.first(where: { $0.1 == entry.gesture })?.0 else { throw ProtocolError.unsupported }
         try await operations.acquire()
         defer { operations.release() }
         let ack = try await request(0x8D, payload: [entry.side - 1, layout, action])
@@ -184,6 +207,20 @@ import HeyBudsProtocol
         try await readGestures()
         guard state.gestures.first(where: { $0.id == entry.id })?.action == action else { throw ProtocolError.readbackMismatch }
         return .confirmed
+    }
+
+    private func readMF1GestureLayout(_ layout: UInt8) async throws {
+        guard isBowieMF1, [0, 1, 2].contains(layout) else { throw ProtocolError.unsupported }
+        let frame = try await request(0x21, payload: [layout])
+        guard frame.payload.count == 3, frame.payload[0] == layout else { throw ProtocolError.invalidPayload }
+        let gesture: UInt8 = [0:2, 1:3, 2:4][Int(layout)]!
+        let retained = state.gestures.filter { $0.gesture != gesture }
+        state.gestures = retained + [
+            GestureEntry(side: 1, mode: 1, gesture: gesture, action: frame.payload[1]),
+            GestureEntry(side: 2, mode: 1, gesture: gesture, action: frame.payload[2]),
+        ]
+        state.observedQueries.insert(Command.gestures)
+        onChange?()
     }
 
     func setGestureChildren(_ entry: GestureEntry, selected: [UInt8]) async throws -> WriteOutcome {
@@ -264,7 +301,7 @@ struct BaseusFrame: Equatable, Sendable {
 
 /// SPP is a byte stream: retain partial reads and split coalesced Baseus replies.
 /// Lengths here are the shapes consumed by Baseus Intelligent 2.18.0's headphone
-/// handlers: AA02/AA33 six bytes, AA34/AA35 three bytes.
+/// handlers: AA02/AA33 six bytes, AA21 five, AA22/AA34/AA35 three.
 struct BaseusFrameCodec {
     private var buffer: [UInt8] = []
     static func encode(_ command: UInt8, payload: [UInt8] = []) -> Data {
@@ -279,6 +316,8 @@ struct BaseusFrameCodec {
             guard buffer.count >= 2 else { break }
             let length: Int
             switch buffer[1] {
+            case 0x21: length = 5
+            case 0x22: length = 3
             case 0x02, 0x33: length = 6
             case 0x34, 0x35, 0x8B, 0x8D, 0x8F: length = 3
             case 0x8C: length = 11
