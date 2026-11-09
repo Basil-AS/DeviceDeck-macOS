@@ -48,6 +48,9 @@ public struct EQPreset: Identifiable, Equatable, Sendable {
     public let chinese: String
     public let english: String
     public let minimumFirmware: Int?
+    public init(id:UInt8,chinese:String,english:String,minimumFirmware:Int?=nil) {
+        self.id=id;self.chinese=chinese;self.english=english;self.minimumFirmware=minimumFirmware
+    }
     public func available(firmware:Int?) -> Bool { minimumFirmware.map { minimum in firmware.map { $0 >= minimum } ?? false } ?? true }
 }
 public struct FeatureDefinition: Identifiable, Equatable, Sendable {
@@ -64,7 +67,7 @@ public struct DeviceModel: Identifiable, Sendable {
     public let brand: String
     public let aliases: [String]
     public let noiseOptions: [NoiseOption]
-    public let presets: [EQPreset]
+    public var presets: [EQPreset]
     public var function: JSONValue { raw["function"] }
     public var family: EarbudFamily { EarbudFamily(rawValue:raw["protocolFamily"].text ?? "oppo") ?? .oppo }
     public var singleBattery: Bool { function["singleBattery"].enabled }

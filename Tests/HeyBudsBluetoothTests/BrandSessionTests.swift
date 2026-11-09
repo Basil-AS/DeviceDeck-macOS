@@ -134,6 +134,51 @@ import HeyBudsProtocol
     catch { #expect(error as? ProtocolError == .unsupported) }
     #expect(!t.commands.dropFirst(before).contains(where:{$0.command == 0x09 || $0.command == 0x08}))
 }
+@Test @MainActor func edifierEqualizerUsesD8ProfileD5StateAndConfirmedC4PresetWrite() async throws {
+    let t=BrandRadio(.edifier),s=DeviceSession(transport:t,name:"W820NB Plus",catalog:try ModelCatalog())
+    defer { s.close() }
+    var selected:UInt8=1
+    t.response={ frame in
+        switch frame.command {
+        case 0xD8:
+            var payload=[UInt8](repeating:0,count:18);payload[13]=7
+            return BrandFrame(0xD8,payload)
+        case 0xD0:return BrandFrame(0xD0,[50])
+        case 0xCC:return BrandFrame(0xCC,[1])
+        case 0xD5:return BrandFrame(0xD5,[selected])
+        case 0xC4:
+            guard let value=frame.payload.first else { return nil }
+            selected=value;return BrandFrame(0xC4,[0])
+        default:return nil
+        }
+    }
+    try await s.open();await s.refresh()
+    #expect(s.model?.presets.map(\.id) == [0,1,2])
+    #expect(s.state.eq == 1 && s.canWrite(Command.setEQ,reading:Command.equalizer))
+    #expect(try await s.setEQ(2) == .confirmed)
+    #expect(s.state.eq == 2)
+    #expect(t.commands.contains(where:{$0.command == 0xD5}))
+    #expect(t.commands.contains(where:{$0.command == 0xC4 && $0.payload == [2]}))
+}
+@Test @MainActor func edifierDoesNotExposeUnsupportedOrUnreportedEqualizerProfiles() async throws {
+    let t=BrandRadio(.edifier),s=DeviceSession(transport:t,name:"W820NB Plus",catalog:try ModelCatalog())
+    defer { s.close() }
+    t.response={ frame in
+        switch frame.command {
+        case 0xD8:
+            var payload=[UInt8](repeating:0,count:18);payload[13]=5
+            return BrandFrame(0xD8,payload)
+        case 0xD0:return BrandFrame(0xD0,[50])
+        case 0xCC:return BrandFrame(0xCC,[1])
+        default:return nil
+        }
+    }
+    try await s.open();await s.refresh()
+    #expect(s.model?.presets.isEmpty == true)
+    #expect(!s.canQuery(Command.equalizer))
+    #expect(!t.commands.contains(where:{$0.command == 0xD5}))
+    #expect(!s.canWrite(Command.setEQ,reading:Command.equalizer))
+}
 @Test @MainActor func vivoSetEchoCannotConfirmNoiseWithoutReadback() async throws {
     let t=BrandRadio(.vivo),s=DeviceSession(transport:t,name:"vivo TWS 4",catalog:try ModelCatalog())
     defer { s.close() };try await s.open();await s.refresh()

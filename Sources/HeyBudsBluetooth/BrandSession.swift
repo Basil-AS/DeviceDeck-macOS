@@ -63,6 +63,9 @@ import HeyBudsProtocol
             // Capabilities are a read-only first probe. Older firmware may not
             // answer D8, so controls still require their own successful reads.
             _ = try? await request(0xD8,timeout:1.2)
+            if let presets=state.edifierCapabilityReport?.equalizerPresets,!presets.isEmpty {
+                model.presets=presets
+            }
             _ = try? await read(Command.battery)
             if state.observedQueries.isEmpty { _ = try? await read(Command.noise) }
             guard !state.observedQueries.isEmpty else { throw ProtocolError.invalidPayload }
@@ -185,6 +188,9 @@ import HeyBudsProtocol
             switch command {
             case Command.battery:sample = try await readRequest(0xD0)
             case Command.noise:sample = try await readRequest(0xCC)
+            case Command.equalizer:
+                guard state.edifierCapabilityReport?.equalizerPresets.isEmpty == false else { throw ProtocolError.unsupported }
+                sample = try await readRequest(0xD5)
             case Command.switches:
                 guard gameFeature != nil || state.edifierCapabilityReport?.reportedControls.contains("gameMode") == true else { throw ProtocolError.unsupported }
                 sample = try await readRequest(0x08)
@@ -322,7 +328,14 @@ import HeyBudsProtocol
     }
     func setEQ(_ id:UInt8) async throws -> WriteOutcome {
         guard canWrite(Command.setEQ,reading:Command.equalizer),model.presets.contains(where:{$0.id == id}) || state.customEQ.contains(where:{$0.id == id}) else { throw ProtocolError.unsupported }
-        return try await confirmedWrite(command:family == .vivo ? 0x0118 : 0x2B49,payload:family == .vivo ? [id] : [1,1,id],read:Command.equalizer) { $0.eq == id }
+        let command:UInt16,payload:[UInt8]
+        switch family {
+        case .vivo:command=0x0118;payload=[id]
+        case .huawei:command=0x2B49;payload=[1,1,id]
+        case .edifier:command=0xC4;payload=[id]
+        default:throw ProtocolError.unsupported
+        }
+        return try await confirmedWrite(command:command,payload:payload,read:Command.equalizer) { $0.eq == id }
     }
     func setSpatial(_ value:UInt8) async throws -> WriteOutcome {
         guard canWrite(Command.setSpatial,reading:Command.spatial),model.spatialModes.contains(value),family == .vivo else { throw ProtocolError.unsupported }
