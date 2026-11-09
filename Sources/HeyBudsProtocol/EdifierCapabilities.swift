@@ -86,6 +86,7 @@ public struct EdifierCapabilityReport: Equatable, Sendable {
         if value(10) == 1 { result.append("powerOff") }
         if value(13).map({ $0 > 0 }) == true { result.append("equalizer") }
         if let game = bit(17, 6), game { result.append("gameMode") }
+        if let prompt = bit(17, 1), prompt { result.append("promptToneSwitch") }
         if let sensitivity = bit(17, 3), sensitivity { result.append("touchSensitivity") }
         if let wear = bit(18, 0), wear { result.append("wearDetection") }
         if let wind = bit(18, 4), wind { result.append("windNoise") }
@@ -109,6 +110,7 @@ public struct EdifierCapabilityReport: Equatable, Sendable {
         ("powerOff", "关机", "Power off"),
         ("equalizer", "均衡器", "Equalizer"),
         ("gameMode", "游戏模式", "Game mode"),
+        ("promptToneSwitch", "提示音开关", "Headphone prompt tones"),
         ("touchSensitivity", "触控灵敏度", "Touch sensitivity"),
         ("wearDetection", "佩戴检测", "Wear detection"),
         ("windNoise", "风噪设置", "Wind noise control"),

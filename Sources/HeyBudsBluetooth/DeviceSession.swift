@@ -402,6 +402,10 @@ public enum WriteOutcome: String, Sendable { case confirmed, sent }
         guard let brandSession else { throw ProtocolError.unsupported }
         return try await brandSession.setEdifierAutoPowerOff(enabled)
     }
+    public func setEdifierPromptTone(_ enabled:Bool) async throws -> WriteOutcome {
+        guard let brandSession else { throw ProtocolError.unsupported }
+        return try await brandSession.setEdifierPromptTone(enabled)
+    }
     public func setEdifierBluetoothName(_ name:String) async throws -> WriteOutcome {
         guard let brandSession else { throw ProtocolError.unsupported }
         return try await brandSession.setEdifierBluetoothName(name)

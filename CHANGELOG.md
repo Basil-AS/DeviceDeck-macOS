@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.0-alpha.18 — 2026-11-09
+
+- Add the EDIFIER W820NB Plus prompt tone switch to the existing DeviceDeck macOS controls when D8 B17 bit 1 reports support. F9 reads state; FA writes and F9 confirms the setting. Physical-device verification remains open.
+
 ## 0.7.0-alpha.17 — 2026-11-09
 
 - Add the EDIFIER W820NB Plus tap and long-press assignment panel inside the existing DeviceDeck app. D8 profile 18 gates F0 reads and F1 writes; the interface exposes the Connect-derived side-specific actions and multi-select noise-cycle settings with readback. Physical headset verification remains open.
