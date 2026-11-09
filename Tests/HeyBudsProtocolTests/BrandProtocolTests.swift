@@ -84,6 +84,13 @@ private func hex(_ string:String) -> [UInt8] { string.split(separator:" ").map {
 
     let supported:[UInt8]=[0,1,1,6,1,1,1,1,1,1,1,0,0,1]
     #expect(EdifierCapabilityReport(payload:supported)?.reportedControls == ["battery","readName","setName","readAddress","firmware","disconnectAudio","repairBluetooth","autoPowerOff","sleepTimer","powerOff","equalizer"])
+    var eqProfile=[UInt8](repeating:0,count:18);eqProfile[13]=7
+    let presets=try #require(EdifierCapabilityReport(payload:eqProfile)?.equalizerPresets)
+    #expect(presets.map(\.id) == [0,1,2])
+    #expect(presets.map(\.english) == ["Classic","Dynamic","Custom"])
+    #expect(presets.map(\.chinese) == ["经典","动感","自定义"])
+    eqProfile[13]=5
+    #expect(EdifierCapabilityReport(payload:eqProfile)?.equalizerPresets.isEmpty == true)
 }
 @Test func goldenBrandFramesAndEveryStreamSplit() throws {
     let fixtures:[(EarbudFamily,UInt8,Bool,BrandFrame,[UInt8])]=[

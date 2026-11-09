@@ -20,6 +20,7 @@
 ## Unreleased
 
 - Add capability-gated Air 7/Air 7 Pro gesture controls to the unified macOS app using the reviewed Android model mappings. Runtime readback still needs the actual earbuds.
+- Add W820NB Plus preset EQ from the reported D8 profile: query current preset with `0xD5`, write the selected preset with `0xC4`, then confirm through a fresh read. Only profile layouts understood by EDIFIER Connect are exposed; physical-device validation remains pending.
 ## 0.7.0-alpha.5 — 2026-11-08
 
 - Add Baseus Bowie MF1 left/right battery reading over RFCOMM/SPP in the unified DeviceDeck app. No undocumented noise-mode controls are shown. Physical-device verification remains pending.

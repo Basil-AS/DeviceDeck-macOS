@@ -21,6 +21,29 @@ public struct EdifierCapabilityReport: Equatable, Sendable {
         value(index).map { $0 & (1 << offset) != 0 }
     }
 
+    /// Edifier's own app treats D8 byte 13 as an EQ profile selector, not a
+    /// Boolean. These preset IDs/names follow its `getEQBean` profile table.
+    /// Profiles 5 (per-side tuning) and 11 (scene EQ) have different UI and
+    /// payload semantics, so they are deliberately not exposed as simple presets.
+    public var equalizerPresets: [EQPreset] {
+        let names:[(english:String,chinese:String)]?
+        switch value(13) {
+        case 1:names=[("Classic","经典"),("Popular","流行"),("Classical","古典"),("Rock","摇滚")]
+        case 2:names=[("Classic","经典"),("Popular","流行"),("Classical","古典"),("Rock","摇滚"),("Dance","舞曲"),("Blues","蓝调")]
+        case 3:names=[("Classic","经典"),("Popular","流行"),("Rock","摇滚")]
+        case 4:names=[("Classic","经典"),("Popular","流行"),("Classical","古典"),("Rock","摇滚"),("Custom","自定义")]
+        case 6:names=[("Standard","标准"),("Surround","环绕"),("Game","游戏")]
+        case 7:names=[("Classic","经典"),("Dynamic","动感"),("Custom","自定义")]
+        case 8:names=[("Classic","经典"),("Dynamic","动感"),("Spatial","空间"),("Custom","自定义")]
+        case 9:names=[("Classic","经典"),("HiFi Camel","HiFi 骆驼"),("STAX","STAX")]
+        case 10:names=[("Classic","经典"),("Monitor","监听"),("Variable","可变"),("Vocal","人声"),("Custom","自定义")]
+        default:names=nil
+        }
+        return (names ?? []).enumerated().map { index,name in
+            EQPreset(id:UInt8(index),chinese:name.chinese,english:name.english)
+        }
+    }
+
     /// Only capabilities explicitly represented by D8 are returned. This is
     /// a device report, not proof that DeviceDeck implements the operation.
     public var reportedControls: [String] {
