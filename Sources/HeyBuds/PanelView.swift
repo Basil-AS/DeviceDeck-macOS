@@ -36,6 +36,7 @@ struct PanelView: View {
     @ViewState<String> private var powerShutdownMinutes=""
     @ViewState<String> private var edifierNameDraft=""
     @ViewState<Int> private var edifierTouchSensitivityDraft=0
+    @ViewState<Int> private var edifierPromptVolumeDraft=0
     private var maxHeight:CGFloat { max(280,(NSScreen.main?.visibleFrame.height ?? 800)-100) }
     var body:some View {
         ScrollView {
@@ -76,6 +77,7 @@ struct PanelView: View {
         .onChange(of:app.sessionID) { _,_ in editEQ=nil }
         .onChange(of:app.state.edifierBluetoothName) { _,name in if let name { edifierNameDraft=name } }
         .onChange(of:app.state.edifierTouchSensitivityValue) { _,value in if let value { edifierTouchSensitivityDraft=Int(value) } }
+        .onChange(of:app.state.edifierPromptVolume) { _,value in if let value { edifierPromptVolumeDraft=Int(value) } }
         .onChange(of:app.state.placement) { _,placement in
             let worn:[UInt8]=app.model?.isT500 == true ? [3] : [3,7]
             if placement.values.contains(where:{worn.contains($0)}) { app.noiseControlHint=nil }
@@ -713,6 +715,20 @@ struct PanelView: View {
                     }))
                     .disabled(!app.ready || app.operationBusy)
                 }
+            }
+            if app.state.edifierCapabilityReport?.reportedControls.contains("voicePromptLevel") == true,
+               let current=app.state.edifierPromptVolume {
+                settingsGroup(L("提示音音量","Voice prompt volume")) {
+                    HStack {
+                        Slider(value:Binding(get:{Double(edifierPromptVolumeDraft)},set:{edifierPromptVolumeDraft=Int($0.rounded())}),in:0...12,step:1)
+                        Text("\(edifierPromptVolumeDraft)").monospacedDigit().frame(minWidth:24)
+                    }
+                    Button(L("保存","Save")) {
+                        let value=UInt8(edifierPromptVolumeDraft)
+                        app.perform { try await $0.setEdifierPromptVolume(value) }
+                    }.disabled(!app.ready || app.operationBusy || edifierPromptVolumeDraft == Int(current))
+                }
+                .onAppear { edifierPromptVolumeDraft=Int(current) }
             }
             if let report=app.state.edifierCapabilityReport,
                report.reportedControls.contains("readName"),report.reportedControls.contains("setName"),report.bluetoothNameLimitBytes > 0 {

@@ -98,6 +98,8 @@ public struct DeviceState: Sendable {
     public var edifierAutoPowerOff: Bool?
     /// Prompt tone switch reported by the Edifier F9 query.
     public var edifierPromptTone: Bool?
+    /// Voice prompt volume reported by Edifier command 0x05 (0–12).
+    public var edifierPromptVolume: UInt8?
     /// Bluetooth name returned by the Edifier C9 query.
     public var edifierBluetoothName: String?
     /// Indexed touch sensitivity reported by Edifier FD (write/readback FE/FD).
