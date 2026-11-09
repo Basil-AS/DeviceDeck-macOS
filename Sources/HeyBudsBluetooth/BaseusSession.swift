@@ -157,7 +157,9 @@ import HeyBudsProtocol
             for index in 0..<4 {
                 let layout = frame.payload[1 + index * 2]
                 guard let gesture = gestureLayouts.first(where: { $0.0 == layout })?.1 else { throw ProtocolError.invalidPayload }
-                entries.append(GestureEntry(side: button + 1, mode: 1, gesture: gesture, action: frame.payload[2 + index * 2]))
+                let entry = GestureEntry(side: button + 1, mode: 1, gesture: gesture, action: frame.payload[2 + index * 2])
+                entries.append(entry)
+                if entry.action == 6 { _ = try? await readGestureChildren(entry, button: button, layout: layout) }
             }
         }
         state.gestures = entries
@@ -182,6 +184,33 @@ import HeyBudsProtocol
         try await readGestures()
         guard state.gestures.first(where: { $0.id == entry.id })?.action == action else { throw ProtocolError.readbackMismatch }
         return .confirmed
+    }
+
+    func setGestureChildren(_ entry: GestureEntry, selected: [UInt8]) async throws -> WriteOutcome {
+        guard canWrite(Command.setGestures, reading: Command.gestures), entry.action == 6,
+              selected.count >= 2, selected.count <= 3, Set(selected).count == selected.count,
+              selected.allSatisfy({ [UInt8(0),1,2].contains($0) }),
+              let layout = gestureLayouts.first(where: { $0.1 == entry.gesture })?.0,
+              state.gestures.contains(where: { $0.id == entry.id && $0.action == 6 }) else { throw ProtocolError.unsupported }
+        try await operations.acquire()
+        defer { operations.release() }
+        let button = entry.side - 1
+        let ack = try await request(0x8F, payload: [button, layout, 6, UInt8(selected.count)] + selected)
+        guard ack.payload.first == 1 else { throw ProtocolError.rejected(ack.payload.first ?? 0) }
+        let confirmed = try await readGestureChildren(entry, button: button, layout: layout)
+        guard confirmed == selected else { throw ProtocolError.readbackMismatch }
+        return .confirmed
+    }
+
+    @discardableResult private func readGestureChildren(_ entry: GestureEntry, button: UInt8, layout: UInt8) async throws -> [UInt8] {
+        let frame = try await request(0x8E, payload: [button, layout, 6])
+        guard frame.payload.count >= 4, frame.payload[0] == button, frame.payload[1] == layout,
+              frame.payload[2] == 6, frame.payload[3] >= 2, frame.payload.count == 4 + Int(frame.payload[3]) else { throw ProtocolError.invalidPayload }
+        let selected = Array(frame.payload.dropFirst(4))
+        guard Set(selected).count == selected.count, selected.allSatisfy({ [UInt8(0),1,2].contains($0) }) else { throw ProtocolError.invalidPayload }
+        state.gestureChildren[entry.id] = selected
+        onChange?()
+        return selected
     }
 
     func setNoise(_ mode: NoiseMode) async throws -> WriteOutcome {
