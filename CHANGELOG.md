@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add Baseus Blade 2 USB-C C1/C2 mode controls for Off, Output/Discharge, and Input/Charge. Read `0x0010` before changing a port, use the APK-mapped `0x0018`–`0x001B` commands, then confirm the resulting mode with a fresh status read. Hardware behavior remains unverified.
+
 ## 0.7.0-alpha.11 — 2026-11-09
 
 - Add the Edifier W820NB Plus scheduled power-off control when D8 reports a timer profile. D3 reads the current minutes; D1 sets a timer and D2 cancels it, with D3 readback after either write. Hardware validation remains pending.

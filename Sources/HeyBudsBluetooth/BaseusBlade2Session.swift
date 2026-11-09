@@ -136,6 +136,31 @@ struct BaseusPowerCodec {
     func setTheme(_ value:UInt16) async throws -> WriteOutcome { try await writeAndRead(0x20,value:value) }
     func setScreenSaver(_ enabled:Bool) async throws -> WriteOutcome { try await writeAndRead(0x22,value:enabled ? 1:0) }
     func setTimer(_ code:UInt16,value:UInt16) async throws -> WriteOutcome { try await writeAndRead(code,value:value) }
+    func setPortMode(port:UInt8,mode:UInt8) async throws -> WriteOutcome {
+        guard ready,(1...2).contains(port),mode <= 2 else { throw ProtocolError.invalidPayload }
+        try await operations.acquire();defer { operations.release() }
+        let status=try await read(0x0010).value
+        let shift=Int(port-1)*2
+        let current=UInt8((status >> shift) & 0x03)
+        guard current < 3 else { throw ProtocolError.invalidPayload }
+        func command(_ selected:UInt8) -> UInt16? {
+            switch (port,selected) {
+            case (1,1): return 0x0018 // C1 output / discharge
+            case (1,2): return 0x0019 // C1 input / charge
+            case (2,1): return 0x001A // C2 output / discharge
+            case (2,2): return 0x001B // C2 input / charge
+            default: return nil
+            }
+        }
+        if current != mode {
+            if current != 0,let code=command(current) { try await channel.send(BaseusPowerCodec.write(code,value:0)) }
+            if mode != 0,let code=command(mode) { try await channel.send(BaseusPowerCodec.write(code,value:1)) }
+        }
+        try await Task.sleep(for:.milliseconds(200))
+        let actual=try await read(0x0010).value
+        guard UInt8((actual >> shift) & 0x03) == mode else { throw ProtocolError.readbackMismatch }
+        return .confirmed
+    }
     func setText(_ value:String) async throws -> WriteOutcome {
         guard ready else { throw ProtocolError.disconnected }
         try await operations.acquire();defer { operations.release() }
