@@ -167,6 +167,8 @@ struct PanelView: View {
             }
             if app.state.powerAccessory.isEmpty { Text(L("等待设备数据…","Waiting for device telemetry…")).foregroundStyle(.secondary).font(.caption) }
             Divider()
+            powerPortRow(1,title:L("USB-C 1 端口","USB-C 1 port"))
+            powerPortRow(2,title:L("USB-C 2 端口","USB-C 2 port"))
             HStack {
                 Text(L("屏幕主题","Screen theme"));Spacer()
                 Picker(L("屏幕主题","Screen theme"),selection:Binding(get:{app.state.powerAccessory[0x20]?.value ?? -1},set:{ value in
@@ -191,6 +193,25 @@ struct PanelView: View {
                 powerShutdownMinutes.isEmpty ? app.state.powerAccessory[0x1F].map{String($0.value)} ?? "" : powerShutdownMinutes
             },set:{powerShutdownMinutes=$0}))
         }.card()
+    }
+    private func powerPortRow(_ port:UInt8,title:String) -> some View {
+        let state=app.state.powerAccessory[0x10]?.value
+        let shift=Int(port-1)*2
+        let mode=state.map{($0 >> shift) & 0x03} ?? 0
+        return HStack(spacing:8) {
+            Text(title).lineLimit(1)
+            Spacer(minLength:4)
+            Picker(title,selection:Binding(get:{mode},set:{ selected in
+                guard let value=UInt8(exactly:selected) else { return }
+                app.perform { try await $0.setBaseusPowerPortMode(port:port,mode:value) }
+            })) {
+                Text(L("关闭","Off")).tag(0)
+                Text(L("输出 · 放电","Output · discharge")).tag(1)
+                Text(L("输入 · 充电","Input · charge")).tag(2)
+                Text(L("未知","Unknown")).tag(3).disabled(true)
+            }.labelsHidden().pickerStyle(.menu).fixedSize()
+                .disabled(app.operationBusy || state == nil)
+        }.font(.caption)
     }
     private func powerTimerRow(_ title:String,code:UInt16,text:Binding<String>) -> some View {
         HStack(spacing:8) {
