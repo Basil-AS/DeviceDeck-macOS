@@ -35,6 +35,7 @@ struct PanelView: View {
     @ViewState<String> private var powerReminderMinutes=""
     @ViewState<String> private var powerShutdownMinutes=""
     @ViewState<String> private var edifierNameDraft=""
+    @ViewState<Int> private var edifierTouchSensitivityDraft=0
     private var maxHeight:CGFloat { max(280,(NSScreen.main?.visibleFrame.height ?? 800)-100) }
     var body:some View {
         ScrollView {
@@ -74,6 +75,7 @@ struct PanelView: View {
         .onChange(of:app.selectedID) { _,_ in page = .home;editEQ=nil }
         .onChange(of:app.sessionID) { _,_ in editEQ=nil }
         .onChange(of:app.state.edifierBluetoothName) { _,name in if let name { edifierNameDraft=name } }
+        .onChange(of:app.state.edifierTouchSensitivityValue) { _,value in if let value { edifierTouchSensitivityDraft=Int(value) } }
         .onChange(of:app.state.placement) { _,placement in
             let worn:[UInt8]=app.model?.isT500 == true ? [3] : [3,7]
             if placement.values.contains(where:{worn.contains($0)}) { app.noiseControlHint=nil }
@@ -716,6 +718,23 @@ struct PanelView: View {
                         app.perform { try await $0.setEdifierBluetoothName(name) }
                     }.disabled(!app.ready || app.operationBusy || edifierNameDraft.utf8.count > report.bluetoothNameLimitBytes || edifierNameDraft.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty)
                 }
+            }
+            if let report=app.state.edifierCapabilityReport,
+               report.reportedControls.contains("touchSensitivity"),
+               let index=app.state.edifierTouchSensitivityIndex,
+               let current=app.state.edifierTouchSensitivityValue,
+               let maximum=EdifierCapabilityReport.touchSensitivityMaximum(index:index) {
+                settingsGroup(L("触控灵敏度","Touch sensitivity")) {
+                    HStack {
+                        Slider(value:Binding(get:{Double(edifierTouchSensitivityDraft)},set:{edifierTouchSensitivityDraft=Int($0.rounded())}),in:0...Double(maximum),step:1)
+                        Text("\(edifierTouchSensitivityDraft)").monospacedDigit().frame(minWidth:24)
+                    }
+                    Button(L("保存","Save")) {
+                        let value=UInt8(edifierTouchSensitivityDraft)
+                        app.perform { try await $0.setEdifierTouchSensitivity(value) }
+                    }.disabled(!app.ready || app.operationBusy || edifierTouchSensitivityDraft == Int(current))
+                }
+                .onAppear { edifierTouchSensitivityDraft=Int(current) }
             }
             if hasEarbudControls {
                 settingsGroup(L("佩戴与操作","Wearing & controls")) { earbudControls }

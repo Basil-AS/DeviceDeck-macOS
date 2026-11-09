@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add Edifier W820NB Plus touch-sensitivity controls to the existing shared DeviceDeck hub when D8 byte 17 bit 3 reports support. Query FD; write indexed values with FE using the Edifier ranges (index 1: 0–31, index 2: 0–15), then confirm through FD readback. Physical-device behavior remains unverified.
+
 ## 0.7.0-alpha.15 — 2026-11-09
 
 - Add capability-gated W820NB Plus Bluetooth name display and rename in the existing DeviceDeck macOS panel. D8 gates C9 reads and CA writes; enforce the reported UTF-8 byte limit and verify with C9 readback.
