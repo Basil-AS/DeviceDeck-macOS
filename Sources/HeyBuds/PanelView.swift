@@ -31,6 +31,7 @@ struct PanelView: View {
     @ViewState<CGFloat> private var contentHeight=300
     @ViewState<EQEditingContext?> private var editEQ:EQEditingContext? = nil
     @ViewState<Bool> private var findConfirmation=false
+    @ViewState<Bool> private var blade2ResetConfirmation=false
     @ViewState<String> private var powerDisplayText=""
     @ViewState<String> private var powerReminderMinutes=""
     @ViewState<String> private var powerShutdownMinutes=""
@@ -72,6 +73,14 @@ struct PanelView: View {
             Button(L("开始响铃","Start ringing")) { app.perform { try await $0.find(true) } }
             Button(L("取消","Cancel"),role:.cancel) { }
         } message: { Text(L("请先摘下耳机。可随时点“停止响铃”结束。","Remove the earbuds first. Use Stop ringing to end the sound.")) }
+        .alert(L("重置 Baseus Blade 2","Reset Baseus Blade 2"),isPresented:$blade2ResetConfirmation) {
+            Button(L("恢复出厂设置","Restore factory settings"),role:.destructive) {
+                app.perform { try await $0.restoreBaseusPowerDefaults() }
+            }
+            Button(L("取消","Cancel"),role:.cancel) { }
+        } message: {
+            Text(L("将发送 Baseus 应用中的恢复出厂设置命令。DeviceDeck 无法确认重置结果。","This sends the factory-reset command found in Baseus's app. DeviceDeck cannot verify whether the reset completed."))
+        }
         .font(.system(size:13))
         .onChange(of:app.selectedID) { _,_ in page = .home;editEQ=nil }
         .onChange(of:app.sessionID) { _,_ in editEQ=nil }
@@ -198,6 +207,9 @@ struct PanelView: View {
             powerTimerRow(L("自动关机 · 分钟","Auto shutdown · min"),code:0x1F,text:Binding(get:{
                 powerShutdownMinutes.isEmpty ? app.state.powerAccessory[0x1F].map{String($0.value)} ?? "" : powerShutdownMinutes
             },set:{powerShutdownMinutes=$0}))
+            Button(role:.destructive) { blade2ResetConfirmation=true } label: {
+                Label(L("Сбросить настройки до заводских","Restore factory settings"),systemImage:"arrow.counterclockwise")
+            }.disabled(app.operationBusy)
         }.card()
     }
     private func powerPortRow(_ port:UInt8,title:String) -> some View {

@@ -182,6 +182,13 @@ public enum BaseusPortProtocol {
         try await channel.send(BaseusPowerCodec.writeText(value))
         return .sent
     }
+    /// App-derived Blade 2 factory-reset command; no reset acknowledgement/readback is documented.
+    func restoreDefaults() async throws -> WriteOutcome {
+        guard ready else { throw ProtocolError.disconnected }
+        try await operations.acquire();defer { operations.release() }
+        try await channel.send(BaseusPowerCodec.write(0x000E,value:0))
+        return .sent
+    }
     func canQuery(_ command:UInt16) -> Bool { false }
     func canWrite(_ command:UInt16,reading:UInt16?) -> Bool { false }
     func setNoise(_ mode:NoiseMode) async throws -> WriteOutcome { throw ProtocolError.unsupported }
