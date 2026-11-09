@@ -551,7 +551,7 @@ struct PanelView: View {
                 Text((entry.side == 1 ? L("左耳 · ","Left · ") : L("右耳 · ","Right · "))+gestureLabel(entry.gesture))
                 Spacer(minLength:8)
                 Picker(L("操作","Action"),selection:Binding(get:{entry.action},set:{ value in app.perform { try await $0.setGesture(entry,action:value) } })) {
-                    ForEach(Array(Set((app.session?.gestureActions(entry) ?? [])+[entry.action])).sorted(),id:\.self) { Text(actionLabel($0,family:app.model?.family)).tag($0) }
+                    ForEach(Array(Set((app.session?.gestureActions(entry) ?? [])+[entry.action])).sorted(),id:\.self) { Text(actionLabel($0,family:app.model?.family,modelID:app.model?.id)).tag($0) }
                 }.labelsHidden().frame(maxWidth:138).disabled(app.operationBusy)
                     .accessibilityLabel((entry.side == 1 ? L("左耳 · ","Left · ") : L("右耳 · ","Right · "))+gestureLabel(entry.gesture))
                 if entry.action == 6, app.model?.id == "baseus:bass-ep10-pro" {
@@ -1221,8 +1221,9 @@ func featureLabel(_ key:String) -> String {
     }
 }
 func gestureLabel(_ value:UInt8) -> String { [1:L("单击","Single press"),2:L("双击","Double press"),3:L("三击","Triple press"),4:L("长按","Hold"),5:L("滑动","Swipe")][Int(value)] ?? L("手势 ","Gesture ")+String(value) }
-func actionLabel(_ value:UInt8,family:EarbudFamily?=nil) -> String {
+func actionLabel(_ value:UInt8,family:EarbudFamily?=nil,modelID:String?=nil) -> String {
     if family == .xiaomi,let label=[0x30:L("增大音量","Volume up"),0x31:L("减小音量","Volume down"),0x32:L("切换降噪模式","Cycle noise modes")][Int(value)] { return label }
+    if modelID == "baseus:bowie-mf1",let label=[0:L("开关机","Power on/off"),1:L("电量播报","Battery announcement"),2:L("播放／暂停","Play / pause"),3:L("接听／挂断","Answer / end call"),4:L("拒接来电","Reject call"),5:L("快速聆听","Quick listen"),11:L("快捷通话","Quick call"),12:L("配对模式","Pairing mode")][Int(value)] { return label }
     if family == .baseus,let label=[1:L("播放／暂停","Play / pause"),2:L("上一首","Previous track"),3:L("下一首","Next track"),4:L("语音助手","Voice assistant"),6:L("切换降噪模式","Cycle noise modes"),11:L("增大音量","Volume up"),12:L("减小音量","Volume down")][Int(value)] { return label }
     return [0:L("无","None"),1:L("播放／暂停","Play / pause"),3:L("语音助手","Voice assistant"),5:L("上一首","Previous track"),6:L("下一首","Next track"),7:L("音量","Volume"),10:L("切换歌曲","Skip track"),17:L("游戏模式","Game mode")][Int(value)] ?? L("操作 ","Action ")+String(value)
 }

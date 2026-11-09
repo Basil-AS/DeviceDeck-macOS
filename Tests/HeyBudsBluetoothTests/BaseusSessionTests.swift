@@ -11,6 +11,7 @@ import HeyBudsProtocol
     var mode: UInt8 = 0
     var level: UInt8 = 0xFF
     var gestures: [UInt8: [UInt8: UInt8]] = [0: [3:1, 0:1, 1:2, 2:6], 1: [3:1, 0:1, 1:3, 2:6]]
+    var legacyGestures: [UInt8: [UInt8]] = [0: [1, 1], 2: [2, 3], 1: [4, 4]]
     var gestureChildren: [String: [UInt8]] = ["0:2": [1, 2, 0], "1:2": [1, 2, 0]]
     func open() async throws { active = true }
     func close() { active = false }
@@ -43,6 +44,13 @@ import HeyBudsProtocol
             let count = Int(bytes[5])
             gestureChildren[key] = Array(bytes[6..<(6 + count)])
             reply = [0xAA, 0x8F, 1]
+        case 0x21:
+            let layout = bytes[2]
+            let actions = legacyGestures[layout] ?? [0, 0]
+            reply = [0xAA, 0x21, layout] + actions
+        case 0x22:
+            legacyGestures[bytes[2]] = [bytes[3], bytes[4]]
+            reply = [0xAA, 0x22, 1]
         default: throw ProtocolError.unsupported
         }
         onEvent?(.data(Data(reply)))
@@ -114,7 +122,7 @@ import HeyBudsProtocol
     #expect(session.state.noise == .light)
 }
 
-@Test @MainActor func bowieMF1UsesOnlyTheBaseusBatteryQueryUntilItsControlsAreMapped() async throws {
+@Test @MainActor func bowieMF1ReadsLegacyGesturesAndConfirmsBA22Writes() async throws {
     let radio = BaseusRadio()
     let session = DeviceSession(transport: radio, name: "Baseus Bowie MF1", catalog: try ModelCatalog())
     defer { session.close() }
@@ -123,10 +131,20 @@ import HeyBudsProtocol
     #expect(session.ready)
     #expect(session.state.batteries[.left]?.percent == 90)
     #expect(session.state.batteries[.right]?.percent == 80)
-    #expect(radio.packets == [Data([0xBA, 0x02])])
+    #expect(radio.packets.contains(Data([0xBA, 0x21, 0x00])))
+    #expect(radio.packets.contains(Data([0xBA, 0x21, 0x02])))
+    #expect(radio.packets.contains(Data([0xBA, 0x21, 0x01])))
     #expect(session.canQuery(Command.battery))
     #expect(!session.canQuery(Command.noise))
     #expect(!session.canWrite(Command.setNoise))
+    #expect(session.canWrite(Command.setGestures, reading: Command.gestures))
+    let leftDouble = try #require(session.state.gestures.first { $0.side == 1 && $0.gesture == 2 })
+    #expect(leftDouble.action == 1)
+    #expect(session.gestureActions(leftDouble) == [11, 12, 1, 2, 3, 4, 0])
+    #expect(try await session.setGesture(leftDouble, action: 2) == .confirmed)
+    #expect(radio.packets.contains(Data([0xBA, 0x22, 0x00, 2, 1])))
+    #expect(session.state.gestures.first { $0.id == leftDouble.id }?.action == 2)
+    #expect(session.gestureActions(try #require(session.state.gestures.first { $0.side == 1 && $0.gesture == 3 })) == [4, 5])
 }
 
 @Suite("Baseus EP10 Pro SPP packets") struct BaseusSessionTests {
@@ -144,6 +162,15 @@ import HeyBudsProtocol
             BaseusFrame(command: 0x02, payload: [90, 0, 80, 1]),
             BaseusFrame(command: 0x34, payload: [1]),
             BaseusFrame(command: 0x33, payload: [1, 0x65, 0, 0]),
+        ])
+    }
+
+    @Test func decodesLegacyGestureReplies() {
+        var codec = BaseusFrameCodec()
+        #expect(codec.feed(Data([0xAA, 0x21, 0, 1])) == [])
+        #expect(codec.feed(Data([2, 0xAA, 0x22, 1])) == [
+            BaseusFrame(command: 0x21, payload: [0, 1, 2]),
+            BaseusFrame(command: 0x22, payload: [1]),
         ])
     }
 
