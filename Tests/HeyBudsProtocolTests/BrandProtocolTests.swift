@@ -76,9 +76,9 @@ private func hex(_ string:String) -> [UInt8] { string.split(separator:" ").map {
 }
 
 @Test func edifierD8ReportDecodesOnlyKnownPresentCapabilityBits() throws {
-    let payload:[UInt8]=[0,1,2,7,2,1,1,0,2,1,2,0,0,2,0,0,0,0x48,0x11,0,0x13]
+    let payload:[UInt8]=[0,1,2,7,2,1,1,0,2,1,2,0,0,2,0,0,0,0x58,0x11,0,0x13]
     let report=try #require(EdifierCapabilityReport(payload:payload))
-    #expect(report.reportedControls == ["battery","firmware","disconnectAudio","sleepTimer","equalizer","gameMode","touchSensitivity","wearDetection","windNoise","hearingProtection","soundSpace","voicePrompts"])
+    #expect(report.reportedControls == ["battery","firmware","disconnectAudio","sleepTimer","equalizer","gameMode","voicePromptLevel","touchSensitivity","wearDetection","windNoise","hearingProtection","soundSpace","voicePrompts"])
     #expect(EdifierCapabilityReport(payload:[1,2,3]) == nil)
     #expect(report.payload == payload)
 
@@ -91,6 +91,17 @@ private func hex(_ string:String) -> [UInt8] { string.split(separator:" ").map {
     #expect(presets.map(\.chinese) == ["经典","动感","自定义"])
     eqProfile[13]=5
     #expect(EdifierCapabilityReport(payload:eqProfile)?.equalizerPresets.isEmpty == true)
+}
+
+@Test func edifierPromptVolumeRequiresCapabilityAndValidLevel() throws {
+    let model=try #require(ModelCatalog().model(productID:nil,name:"W820NB Plus"))
+    var payload=[UInt8](repeating:0,count:18);payload[17]=0x10
+    var state=DeviceState()
+    #expect(BrandState.apply(BrandFrame(0xD8,payload),model:model,to:&state))
+    #expect(BrandState.apply(BrandFrame(0x05,[12]),model:model,to:&state))
+    #expect(state.edifierPromptVolume == 12)
+    #expect(state.observedQueries.contains(Command.edifierPromptVolume))
+    #expect(!BrandState.apply(BrandFrame(0x05,[13]),model:model,to:&state))
 }
 @Test func goldenBrandFramesAndEveryStreamSplit() throws {
     let fixtures:[(EarbudFamily,UInt8,Bool,BrandFrame,[UInt8])]=[

@@ -99,7 +99,7 @@ import HeyBudsProtocol
     func refresh() async {
         guard ready else { return }
         let token=generation
-        for command in [Command.battery,Command.noise,Command.equalizer,Command.spatial,Command.switches,Command.wear,Command.firmware,Command.hosts,Command.edifierSleepTimer,Command.edifierAutoPowerOff,Command.edifierPromptTone,Command.edifierBluetoothName,Command.edifierTouchSensitivity] where canQuery(command) {
+        for command in [Command.battery,Command.noise,Command.equalizer,Command.spatial,Command.switches,Command.wear,Command.firmware,Command.hosts,Command.edifierSleepTimer,Command.edifierAutoPowerOff,Command.edifierPromptTone,Command.edifierPromptVolume,Command.edifierBluetoothName,Command.edifierTouchSensitivity] where canQuery(command) {
             guard !Task.isCancelled,ready,generation == token else { return }
             _ = try? await read(command)
         }
@@ -135,6 +135,7 @@ import HeyBudsProtocol
         case Command.edifierSleepTimer:return family == .edifier && state.edifierCapabilityReport?.sleepTimerOptions.isEmpty == false
         case Command.edifierAutoPowerOff:return family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("autoPowerOff") == true
         case Command.edifierPromptTone:return family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("promptToneSwitch") == true
+        case Command.edifierPromptVolume:return family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("voicePromptLevel") == true
         case Command.edifierBluetoothName:return family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("readName") == true
         case Command.edifierTouchSensitivity:return family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("touchSensitivity") == true
         case Command.wear,Command.firmware:return family == .vivo
@@ -209,6 +210,9 @@ import HeyBudsProtocol
             case Command.edifierPromptTone:
                 guard state.edifierCapabilityReport?.reportedControls.contains("promptToneSwitch") == true else { throw ProtocolError.unsupported }
                 sample = try await readRequest(0xF9)
+            case Command.edifierPromptVolume:
+                guard state.edifierCapabilityReport?.reportedControls.contains("voicePromptLevel") == true else { throw ProtocolError.unsupported }
+                sample = try await readRequest(0x05)
             case Command.edifierBluetoothName:
                 guard state.edifierCapabilityReport?.reportedControls.contains("readName") == true else { throw ProtocolError.unsupported }
                 sample = try await readRequest(0xC9)
@@ -379,6 +383,13 @@ import HeyBudsProtocol
         guard family == .edifier,state.edifierCapabilityReport?.reportedControls.contains("promptToneSwitch") == true,
               state.edifierPromptTone != nil else { throw ProtocolError.unsupported }
         return try await confirmedWrite(command:0xFA,payload:[enabled ? 1 : 0],read:Command.edifierPromptTone) { $0.edifierPromptTone == enabled }
+    }
+    func setEdifierPromptVolume(_ level:UInt8) async throws -> WriteOutcome {
+        guard family == .edifier,
+              state.edifierCapabilityReport?.reportedControls.contains("voicePromptLevel") == true,
+              state.edifierPromptVolume != nil,
+              level <= 12 else { throw ProtocolError.unsupported }
+        return try await confirmedWrite(command:0x06,payload:[level],read:Command.edifierPromptVolume) { $0.edifierPromptVolume == level }
     }
     func setEdifierBluetoothName(_ name:String) async throws -> WriteOutcome {
         guard family == .edifier,
