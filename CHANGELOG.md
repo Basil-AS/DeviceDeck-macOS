@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Add the Edifier W820NB Plus scheduled power-off control when D8 reports a timer profile. D3 reads the current minutes; D1 sets a timer and D2 cancels it, with D3 readback after either write. Hardware validation remains pending.
+- 当 D8 报告支持定时功能时，为 Edifier W820NB Plus 显示定时关机控制。D3 读取分钟数；D1 设置、D2 取消，并在写入后通过 D3 回读确认。仍待实机验证。
+
 ## 0.7.0-alpha.10 — 2026-11-09
 
 - Add capability-gated W820NB Plus preset EQ in the unified DeviceDeck app. The D8 profile selects the known preset layout, D5 reads the current preset, and C4 writes a selected preset followed by a separate readback. Unsupported profile layouts are not exposed. Hardware validation remains pending.

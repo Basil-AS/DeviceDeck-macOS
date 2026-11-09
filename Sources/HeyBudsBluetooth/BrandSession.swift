@@ -99,7 +99,7 @@ import HeyBudsProtocol
     func refresh() async {
         guard ready else { return }
         let token=generation
-        for command in [Command.battery,Command.noise,Command.equalizer,Command.spatial,Command.switches,Command.wear,Command.firmware,Command.hosts] where canQuery(command) {
+        for command in [Command.battery,Command.noise,Command.equalizer,Command.spatial,Command.switches,Command.wear,Command.firmware,Command.hosts,Command.edifierSleepTimer] where canQuery(command) {
             guard !Task.isCancelled,ready,generation == token else { return }
             _ = try? await read(command)
         }
@@ -129,6 +129,7 @@ import HeyBudsProtocol
         case Command.spatial:return !model.spatialModes.isEmpty
         case Command.switches:return !availableFeatures.isEmpty || reportsGameMode
         case Command.hosts:return model.hasMultiDevice
+        case Command.edifierSleepTimer:return family == .edifier && state.edifierCapabilityReport?.sleepTimerOptions.isEmpty == false
         case Command.wear,Command.firmware:return family == .vivo
         default:return false
         }
@@ -140,6 +141,7 @@ import HeyBudsProtocol
         case Command.setEQ:return (!model.presets.isEmpty || !state.customEQ.isEmpty) && state.eq != nil
         case Command.setSpatial:return supportsSpatialAudio
         case Command.setSwitch:return availableFeatures.contains(where:canSetFeature) || gameFeature != nil
+        case Command.edifierSleepTimer:return family == .edifier && state.edifierSleepTimerMinutes != nil && state.edifierCapabilityReport?.sleepTimerOptions.contains(UInt16(reading ?? 0)) == true
         case Command.setCustomEQ:return !model.customEQFrequencies.isEmpty && state.observedQueries.contains(Command.customEQ)
         case Command.operateHost:return model.hasMultiDevice && state.observedQueries.contains(Command.hosts)
         case Command.find:return family == .vivo && model.function["findDevice"].enabled
@@ -191,6 +193,9 @@ import HeyBudsProtocol
             case Command.equalizer:
                 guard state.edifierCapabilityReport?.equalizerPresets.isEmpty == false else { throw ProtocolError.unsupported }
                 sample = try await readRequest(0xD5)
+            case Command.edifierSleepTimer:
+                guard state.edifierCapabilityReport?.sleepTimerOptions.isEmpty == false else { throw ProtocolError.unsupported }
+                sample = try await readRequest(0xD3)
             case Command.switches:
                 guard gameFeature != nil || state.edifierCapabilityReport?.reportedControls.contains("gameMode") == true else { throw ProtocolError.unsupported }
                 sample = try await readRequest(0x08)
@@ -303,6 +308,8 @@ import HeyBudsProtocol
                 case 0x2B6C:query=0x2B6C
                 case 0x2B2E:query=0x2B2F
                 case 0x09 where family == .edifier:query=0x08
+                case 0xD1 where family == .edifier:query=0xD3
+                case 0xD2 where family == .edifier:query=0xD3
                 default:throw ProtocolError.unsupported
                 }
                 sample = try await readRequest(query,payload:family == .huawei ? [query == 0x2B6C ? 2 : 1,0] : [])
@@ -336,6 +343,13 @@ import HeyBudsProtocol
         default:throw ProtocolError.unsupported
         }
         return try await confirmedWrite(command:command,payload:payload,read:Command.equalizer) { $0.eq == id }
+    }
+    func setEdifierSleepTimer(_ minutes:UInt16) async throws -> WriteOutcome {
+        guard family == .edifier,canWrite(Command.edifierSleepTimer,reading:minutes),
+              let options=state.edifierCapabilityReport?.sleepTimerOptions,options.contains(minutes) else { throw ProtocolError.unsupported }
+        let command:UInt16=minutes == 0 ? 0xD2 : 0xD1
+        let payload=minutes == 0 ? [] : [UInt8(minutes >> 8),UInt8(minutes & 0xFF)]
+        return try await confirmedWrite(command:command,payload:payload,read:Command.edifierSleepTimer) { $0.edifierSleepTimerMinutes == minutes }
     }
     func setSpatial(_ value:UInt8) async throws -> WriteOutcome {
         guard canWrite(Command.setSpatial,reading:Command.spatial),model.spatialModes.contains(value),family == .vivo else { throw ProtocolError.unsupported }

@@ -78,6 +78,8 @@ public struct DeviceState: Sendable {
     /// Raw Edifier D8 capability payload. Preserve unknown bits for diagnostics
     /// instead of interpreting undocumented fields as enabled controls.
     public var edifierCapabilities: [UInt8]?
+    /// Scheduled power-off minutes reported by the Edifier D3 query.
+    public var edifierSleepTimerMinutes: UInt16?
     public var edifierCapabilityReport: EdifierCapabilityReport? {
         guard let edifierCapabilities else { return nil }
         return EdifierCapabilityReport(payload: edifierCapabilities)
