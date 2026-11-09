@@ -52,6 +52,15 @@ public struct GestureEntry: Equatable, Identifiable, Sendable {
     }
     public var id: String { "\(side)-\(mode)-\(gesture)" }
 }
+public struct EdifierTouchControl: Equatable, Identifiable, Sendable {
+    public var index: UInt8
+    public var action: UInt8
+    public var noiseMask: UInt8?
+    public var id: UInt8 { index }
+    public init(index: UInt8, action: UInt8, noiseMask: UInt8? = nil) {
+        self.index=index; self.action=action; self.noiseMask=noiseMask
+    }
+}
 public struct DeviceState: Sendable {
     public var productID: String?
     public var firmware: String?
@@ -92,6 +101,7 @@ public struct DeviceState: Sendable {
     /// Indexed touch sensitivity reported by Edifier FD (write/readback FE/FD).
     public var edifierTouchSensitivityIndex: UInt8?
     public var edifierTouchSensitivityValue: UInt8?
+    public var edifierTouchControls: [EdifierTouchControl] = []
     public var edifierCapabilityReport: EdifierCapabilityReport? {
         guard let edifierCapabilities else { return nil }
         return EdifierCapabilityReport(payload: edifierCapabilities)
