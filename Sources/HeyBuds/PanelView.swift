@@ -704,7 +704,7 @@ struct PanelView: View {
                 }
             }
             if let report=app.state.edifierCapabilityReport,
-               report.reportedControls.contains("setName"),report.bluetoothNameLimitBytes > 0 {
+               report.reportedControls.contains("readName"),report.reportedControls.contains("setName"),report.bluetoothNameLimitBytes > 0 {
                 settingsGroup(L("设备名称","Device name")) {
                     if let current=app.state.edifierBluetoothName { Text(L("当前：\(current)","Current: \(current)")).font(.system(size:11)).foregroundStyle(.secondary) }
                     TextField(L("Bluetooth name","Bluetooth name"),text:$edifierNameDraft)

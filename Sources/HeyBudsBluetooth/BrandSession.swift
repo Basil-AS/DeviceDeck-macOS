@@ -367,8 +367,10 @@ import HeyBudsProtocol
     func setEdifierBluetoothName(_ name:String) async throws -> WriteOutcome {
         guard family == .edifier,
               (state.edifierCapabilityReport?.bluetoothNameLimitBytes ?? 0) > 0,
+              state.edifierCapabilityReport?.reportedControls.contains("readName") == true,
               state.edifierCapabilityReport?.reportedControls.contains("setName") == true,
-              !name.isEmpty, !name.unicodeScalars.contains(where:CharacterSet.controlCharacters.contains),
+              !name.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty,
+              !name.unicodeScalars.contains(where:CharacterSet.controlCharacters.contains),
               name.utf8.count <= (state.edifierCapabilityReport?.bluetoothNameLimitBytes ?? 0) else { throw ProtocolError.unsupported }
         return try await confirmedWrite(command:0xCA,payload:Array(name.utf8),read:Command.edifierBluetoothName) { $0.edifierBluetoothName == name }
     }
