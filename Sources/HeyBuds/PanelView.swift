@@ -720,7 +720,7 @@ struct PanelView: View {
                let current=app.state.edifierPromptVolume {
                 settingsGroup(L("提示音音量","Voice prompt volume")) {
                     HStack {
-                        Slider(value:Binding(get:{Double(edifierPromptVolumeDraft)},set:{edifierPromptVolumeDraft=Int($0.rounded())}),in:0...12,step:1)
+                        Slider(value:Binding(get:{Double(edifierPromptVolumeDraft)},set:{edifierPromptVolumeDraft=Int($0.rounded())}),in:0...15,step:1)
                         Text("\(edifierPromptVolumeDraft)").monospacedDigit().frame(minWidth:24)
                     }
                     Button(L("保存","Save")) {
