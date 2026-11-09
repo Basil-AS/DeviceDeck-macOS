@@ -61,6 +61,11 @@ public struct EdifierCapabilityReport: Equatable, Sendable {
         }
     }
 
+    /// Edifier Connect sensitivity value maximum by FD index.
+    public static func touchSensitivityMaximum(index: UInt8) -> UInt8? {
+        switch index { case 1: return 31; case 2: return 15; default: return nil }
+    }
+
     /// Only capabilities explicitly represented by D8 are returned. This is
     /// a device report, not proof that DeviceDeck implements the operation.
     public var reportedControls: [String] {

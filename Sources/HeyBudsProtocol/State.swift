@@ -89,6 +89,9 @@ public struct DeviceState: Sendable {
     public var edifierAutoPowerOff: Bool?
     /// Bluetooth name returned by the Edifier C9 query.
     public var edifierBluetoothName: String?
+    /// Indexed touch sensitivity reported by Edifier FD (write/readback FE/FD).
+    public var edifierTouchSensitivityIndex: UInt8?
+    public var edifierTouchSensitivityValue: UInt8?
     public var edifierCapabilityReport: EdifierCapabilityReport? {
         guard let edifierCapabilities else { return nil }
         return EdifierCapabilityReport(payload: edifierCapabilities)
