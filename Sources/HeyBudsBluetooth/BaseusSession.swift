@@ -16,7 +16,7 @@ import HeyBudsProtocol
     private var generation = UUID()
     private var poll: Task<Void, Never>?
     private var noiseType: UInt8?
-    private var supportsGestures: Bool { model?.id == "baseus:bass-ep10-pro" || isBowieMF1 }
+    private var supportsGestures: Bool { model?.id == "baseus:bass-ep10-pro" || isBowieMF1 || isBowie30 }
     private let gestureLayouts: [(UInt8, UInt8)] = [(3, 1), (0, 2), (1, 3), (2, 4)]
 
     private var isBowie30: Bool { model?.id == "baseus:bowie-30" }
@@ -150,8 +150,8 @@ import HeyBudsProtocol
     }
 
     private func readGestures() async throws {
-        if isBowieMF1 {
-            for layout: UInt8 in [0, 2, 1] { try await readMF1GestureLayout(layout) }
+        if isBowieMF1 || isBowie30 {
+            for layout: UInt8 in [0, 2, 1] { try await readLegacyGestureLayout(layout) }
             return
         }
         var entries: [GestureEntry] = []
@@ -176,6 +176,10 @@ import HeyBudsProtocol
             guard entry.mode == 1, (1...2).contains(entry.side), (2...4).contains(entry.gesture) else { return [] }
             return entry.gesture == 3 ? [4, 5] : [11, 12, 1, 2, 3, 4, 0]
         }
+        if isBowie30 {
+            guard entry.mode == 1, (1...2).contains(entry.side), (2...4).contains(entry.gesture) else { return [] }
+            return [0, 1, 2, 3, 4, 6]
+        }
         guard supportsGestures, entry.mode == 1, (1...2).contains(entry.side),
               gestureLayouts.contains(where: { $0.1 == entry.gesture }) else { return [] }
         return entry.gesture == 1 ? [0, 1] : [0, 1, 2, 3, 4, 6, 11, 12]
@@ -195,7 +199,20 @@ import HeyBudsProtocol
             let nextRight = entry.side == 2 ? action : right
             let ack = try await request(0x22, payload: [layout, nextLeft, nextRight])
             guard ack.payload.first == 1 else { throw ProtocolError.rejected(ack.payload.first ?? 0) }
-            try await readMF1GestureLayout(layout)
+            try await readLegacyGestureLayout(layout)
+            guard state.gestures.first(where: { $0.id == entry.id })?.action == action else { throw ProtocolError.readbackMismatch }
+            return .confirmed
+        }
+        if isBowie30 {
+            guard let layout: UInt8 = [2:0, 3:1, 4:2][entry.gesture] else { throw ProtocolError.unsupported }
+            try await operations.acquire()
+            defer { operations.release() }
+            let existing = state.gestures.filter { $0.gesture == entry.gesture }
+            guard let left = existing.first(where: { $0.side == 1 })?.action,
+                  let right = existing.first(where: { $0.side == 2 })?.action else { throw ProtocolError.invalidPayload }
+            let ack = try await request(0x22, payload: [layout, entry.side == 1 ? action : left, entry.side == 2 ? action : right])
+            guard ack.payload.first == 1 else { throw ProtocolError.rejected(ack.payload.first ?? 0) }
+            try await readLegacyGestureLayout(layout)
             guard state.gestures.first(where: { $0.id == entry.id })?.action == action else { throw ProtocolError.readbackMismatch }
             return .confirmed
         }
@@ -209,8 +226,8 @@ import HeyBudsProtocol
         return .confirmed
     }
 
-    private func readMF1GestureLayout(_ layout: UInt8) async throws {
-        guard isBowieMF1, [0, 1, 2].contains(layout) else { throw ProtocolError.unsupported }
+    private func readLegacyGestureLayout(_ layout: UInt8) async throws {
+        guard (isBowieMF1 || isBowie30), [0, 1, 2].contains(layout) else { throw ProtocolError.unsupported }
         let frame = try await request(0x21, payload: [layout])
         guard frame.payload.count == 3, frame.payload[0] == layout else { throw ProtocolError.invalidPayload }
         let gesture: UInt8 = [0:2, 1:3, 2:4][Int(layout)]!
