@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.7.0-alpha.25 — 2026-11-09
 
 - Add the Baseus Intelligent Blade 2 factory-reset command to the existing DeviceDeck power-accessory panel. Require explicit confirmation; the vendor app provides no reset acknowledgement or readback, so DeviceDeck reports only that the command was sent. Hardware verification remains open.
 
