@@ -8,7 +8,7 @@
       "protocolFamily": "baseus",
       "children": [],
       "aliases": ["Bowie 30"],
-      "function": { "singleBattery": false },
+      "function": { "singleBattery": true },
       "noise": [
         { "mode": "off", "bytes": [0, 255] },
         { "mode": "smart", "bytes": [1, 8] },
