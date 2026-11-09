@@ -375,6 +375,10 @@ public enum WriteOutcome: String, Sendable { case confirmed, sent }
         guard let backend=additionalSession as? BaseusBlade2Session else { throw ProtocolError.unsupported }
         return try await backend.setScreenSaver(enabled)
     }
+    public func setBaseusPowerPortMode(port:UInt8,mode:UInt8) async throws -> WriteOutcome {
+        guard let backend=additionalSession as? BaseusBlade2Session else { throw ProtocolError.unsupported }
+        return try await backend.setPortMode(port:port,mode:mode)
+    }
     public func setBaseusPowerTimer(_ code:UInt16,value:UInt16) async throws -> WriteOutcome {
         guard let backend=additionalSession as? BaseusBlade2Session else { throw ProtocolError.unsupported }
         return try await backend.setTimer(code,value:value)
