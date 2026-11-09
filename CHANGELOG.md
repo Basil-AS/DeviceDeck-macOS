@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Enable the realme Buds Air7 Pro dual-device connection switch in the unified DeviceDeck macOS app, based on the realme Link profile and official supported-model list. DeviceDeck exposes the toggle only; connected-device management is not mapped for this model. Hardware verification remains open.
+
 ## 0.7.0-alpha.25 — 2026-11-09
 
 - Add the Baseus Intelligent Blade 2 factory-reset command to the existing DeviceDeck power-accessory panel. Require explicit confirmation; the vendor app provides no reset acknowledgement or readback, so DeviceDeck reports only that the command was sent. Hardware verification remains open.

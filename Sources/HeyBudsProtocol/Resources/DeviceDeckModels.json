@@ -86,6 +86,7 @@
         "findDevice": 1,
         "dolbyAtmos": 1,
         "gameMode": 1,
+        "multiDevicesConnect": 1,
         "control": [
           {"ear":2,"action":2,"support":581,"showEar":0},
           {"ear":2,"action":3,"support":8801,"showEar":0},
