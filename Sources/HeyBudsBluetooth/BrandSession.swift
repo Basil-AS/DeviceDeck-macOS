@@ -99,7 +99,7 @@ import HeyBudsProtocol
     func refresh() async {
         guard ready else { return }
         let token=generation
-        for command in [Command.battery,Command.noise,Command.equalizer,Command.spatial,Command.switches,Command.wear,Command.firmware,Command.hosts,Command.edifierSleepTimer,Command.edifierAutoPowerOff,Command.edifierBluetoothName,Command.edifierTouchSensitivity] where canQuery(command) {
+        for command in [Command.battery,Command.noise,Command.equalizer,Command.spatial,Command.switches,Command.wear,Command.firmware,Command.hosts,Command.edifierSleepTimer,Command.edifierAutoPowerOff,Command.edifierPromptTone,Command.edifierBluetoothName,Command.edifierTouchSensitivity] where canQuery(command) {
             guard !Task.isCancelled,ready,generation == token else { return }
             _ = try? await read(command)
         }
@@ -134,6 +134,7 @@ import HeyBudsProtocol
         case Command.hosts:return model.hasMultiDevice
         case Command.edifierSleepTimer:return family == .edifier && state.edifierCapabilityReport?.sleepTimerOptions.isEmpty == false
         case Command.edifierAutoPowerOff:return family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("autoPowerOff") == true
+        case Command.edifierPromptTone:return family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("promptToneSwitch") == true
         case Command.edifierBluetoothName:return family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("readName") == true
         case Command.edifierTouchSensitivity:return family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("touchSensitivity") == true
         case Command.wear,Command.firmware:return family == .vivo
@@ -205,6 +206,9 @@ import HeyBudsProtocol
             case Command.edifierAutoPowerOff:
                 guard state.edifierCapabilityReport?.reportedControls.contains("autoPowerOff") == true else { throw ProtocolError.unsupported }
                 sample = try await readRequest(0xD7)
+            case Command.edifierPromptTone:
+                guard state.edifierCapabilityReport?.reportedControls.contains("promptToneSwitch") == true else { throw ProtocolError.unsupported }
+                sample = try await readRequest(0xF9)
             case Command.edifierBluetoothName:
                 guard state.edifierCapabilityReport?.reportedControls.contains("readName") == true else { throw ProtocolError.unsupported }
                 sample = try await readRequest(0xC9)
@@ -370,6 +374,11 @@ import HeyBudsProtocol
         guard family == .edifier,state.edifierCapabilityReport?.reportedControls.contains("autoPowerOff") == true,
               state.edifierAutoPowerOff != nil else { throw ProtocolError.unsupported }
         return try await confirmedWrite(command:0xD6,payload:[enabled ? 1 : 0],read:Command.edifierAutoPowerOff) { $0.edifierAutoPowerOff == enabled }
+    }
+    func setEdifierPromptTone(_ enabled:Bool) async throws -> WriteOutcome {
+        guard family == .edifier,state.edifierCapabilityReport?.reportedControls.contains("promptToneSwitch") == true,
+              state.edifierPromptTone != nil else { throw ProtocolError.unsupported }
+        return try await confirmedWrite(command:0xFA,payload:[enabled ? 1 : 0],read:Command.edifierPromptTone) { $0.edifierPromptTone == enabled }
     }
     func setEdifierBluetoothName(_ name:String) async throws -> WriteOutcome {
         guard family == .edifier,

@@ -96,6 +96,8 @@ public struct DeviceState: Sendable {
     public var edifierSleepTimerMinutes: UInt16?
     /// Auto power-off when no audio is playing, queried with Edifier D7.
     public var edifierAutoPowerOff: Bool?
+    /// Prompt tone switch reported by the Edifier F9 query.
+    public var edifierPromptTone: Bool?
     /// Bluetooth name returned by the Edifier C9 query.
     public var edifierBluetoothName: String?
     /// Indexed touch sensitivity reported by Edifier FD (write/readback FE/FD).

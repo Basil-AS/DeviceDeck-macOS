@@ -705,6 +705,15 @@ struct PanelView: View {
                     .disabled(!app.ready || app.operationBusy)
                 }
             }
+            if app.state.edifierCapabilityReport?.reportedControls.contains("promptToneSwitch") == true,
+               let current=app.state.edifierPromptTone {
+                settingsGroup(L("提示音","Headphone prompts")) {
+                    Toggle(L("耳机语音提示音","Headphone prompt tones"),isOn:Binding(get:{current},set:{ enabled in
+                        app.perform { try await $0.setEdifierPromptTone(enabled) }
+                    }))
+                    .disabled(!app.ready || app.operationBusy)
+                }
+            }
             if let report=app.state.edifierCapabilityReport,
                report.reportedControls.contains("readName"),report.reportedControls.contains("setName"),report.bluetoothNameLimitBytes > 0 {
                 settingsGroup(L("设备名称","Device name")) {
