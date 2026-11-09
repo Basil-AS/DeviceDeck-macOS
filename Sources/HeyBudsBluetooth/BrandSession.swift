@@ -99,7 +99,7 @@ import HeyBudsProtocol
     func refresh() async {
         guard ready else { return }
         let token=generation
-        for command in [Command.battery,Command.noise,Command.equalizer,Command.spatial,Command.switches,Command.wear,Command.firmware,Command.hosts,Command.edifierSleepTimer] where canQuery(command) {
+        for command in [Command.battery,Command.noise,Command.equalizer,Command.spatial,Command.switches,Command.wear,Command.firmware,Command.hosts,Command.edifierSleepTimer,Command.edifierAutoPowerOff] where canQuery(command) {
             guard !Task.isCancelled,ready,generation == token else { return }
             _ = try? await read(command)
         }
@@ -130,6 +130,7 @@ import HeyBudsProtocol
         case Command.switches:return !availableFeatures.isEmpty || reportsGameMode
         case Command.hosts:return model.hasMultiDevice
         case Command.edifierSleepTimer:return family == .edifier && state.edifierCapabilityReport?.sleepTimerOptions.isEmpty == false
+        case Command.edifierAutoPowerOff:return family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("autoPowerOff") == true
         case Command.wear,Command.firmware:return family == .vivo
         default:return false
         }
@@ -196,6 +197,9 @@ import HeyBudsProtocol
             case Command.edifierSleepTimer:
                 guard state.edifierCapabilityReport?.sleepTimerOptions.isEmpty == false else { throw ProtocolError.unsupported }
                 sample = try await readRequest(0xD3)
+            case Command.edifierAutoPowerOff:
+                guard state.edifierCapabilityReport?.reportedControls.contains("autoPowerOff") == true else { throw ProtocolError.unsupported }
+                sample = try await readRequest(0xD7)
             case Command.switches:
                 guard gameFeature != nil || state.edifierCapabilityReport?.reportedControls.contains("gameMode") == true else { throw ProtocolError.unsupported }
                 sample = try await readRequest(0x08)
@@ -350,6 +354,11 @@ import HeyBudsProtocol
         let command:UInt16=minutes == 0 ? 0xD2 : 0xD1
         let payload=minutes == 0 ? [] : [UInt8(minutes >> 8),UInt8(minutes & 0xFF)]
         return try await confirmedWrite(command:command,payload:payload,read:Command.edifierSleepTimer) { $0.edifierSleepTimerMinutes == minutes }
+    }
+    func setEdifierAutoPowerOff(_ enabled:Bool) async throws -> WriteOutcome {
+        guard family == .edifier,state.edifierCapabilityReport?.reportedControls.contains("autoPowerOff") == true,
+              state.edifierAutoPowerOff != nil else { throw ProtocolError.unsupported }
+        return try await confirmedWrite(command:0xD6,payload:[enabled ? 1 : 0],read:Command.edifierAutoPowerOff) { $0.edifierAutoPowerOff == enabled }
     }
     func setSpatial(_ value:UInt8) async throws -> WriteOutcome {
         guard canWrite(Command.setSpatial,reading:Command.spatial),model.spatialModes.contains(value),family == .vivo else { throw ProtocolError.unsupported }

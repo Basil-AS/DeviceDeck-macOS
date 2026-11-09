@@ -692,6 +692,15 @@ struct PanelView: View {
                     }
                 }
             }
+            if app.state.edifierCapabilityReport?.reportedControls.contains("autoPowerOff") == true,
+               let current=app.state.edifierAutoPowerOff {
+                settingsGroup(L("电源","Power")) {
+                    Toggle(L("无音频时自动关机","Auto power-off without audio"),isOn:Binding(get:{current},set:{ enabled in
+                        app.perform { try await $0.setEdifierAutoPowerOff(enabled) }
+                    }))
+                    .disabled(!app.ready || app.operationBusy)
+                }
+            }
             if hasEarbudControls {
                 settingsGroup(L("佩戴与操作","Wearing & controls")) { earbudControls }
             }

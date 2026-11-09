@@ -85,6 +85,8 @@ public struct DeviceState: Sendable {
     public var edifierCapabilities: [UInt8]?
     /// Scheduled power-off minutes reported by the Edifier D3 query.
     public var edifierSleepTimerMinutes: UInt16?
+    /// Auto power-off when no audio is playing, queried with Edifier D7.
+    public var edifierAutoPowerOff: Bool?
     public var edifierCapabilityReport: EdifierCapabilityReport? {
         guard let edifierCapabilities else { return nil }
         return EdifierCapabilityReport(payload: edifierCapabilities)
