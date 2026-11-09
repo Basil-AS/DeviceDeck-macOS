@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.0-alpha.22 — 2026-11-09
+
+- Show the negotiated USB-C protocols reported by Baseus Blade 2 and Blade 2-140 as readable per-port labels in the existing DeviceDeck power accessory panel.
+- Keep Baseus controls in the unified DeviceDeck app; no separate Baseus app or release channel.
+
 ## 0.7.0-alpha.21 — 2026-11-09
 
 - Correct the EDIFIER W820NB Plus voice prompt volume range in the existing DeviceDeck panel to 0–15, matching the supplied Connect APK option list. D8 B17 bit 4 still gates the setting; 0x05 reads, 0x06 writes, and a fresh 0x05 confirms the value. Physical-device verification remains open. This supersedes alpha.20 for this control.
