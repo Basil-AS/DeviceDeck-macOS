@@ -65,6 +65,10 @@
 - Add initial Baseus Bass EP10 Pro SPP support on macOS: query left/right battery and noise mode; set Off, ANC, and Transparency with ACK plus state readback. Protocol source is the user-supplied Baseus Intelligent 2.18.0 APK; physical-device validation is still required.
 - 在 macOS 新增 Baseus Bass EP10 Pro 的初步 SPP 支持：读取左右耳电量和降噪模式；切换关闭、降噪、通透，并检查确认及状态回读。协议依据为用户提供的 Baseus Intelligent 2.18.0 APK；仍需实机验证。
 
+## 0.7.0-alpha.19 — 2026-11-09
+
+- Add Baseus Bowie MF1 double/triple/long-press gesture controls to the unified DeviceDeck macOS app. Use the model-specific legacy BA21/BA22 commands, preserve the other earbud's action, require the AA22 success reply and confirm each write with BA21 readback. The action list comes from Baseus Intelligent 2.18.0; physical-device verification remains open.
+
 ## Unreleased
 
 ## 0.7.0-alpha.5 — 2026-11-08
