@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add the Baseus Intelligent Blade 2 factory-reset command to the existing DeviceDeck power-accessory panel. Require explicit confirmation; the vendor app provides no reset acknowledgement or readback, so DeviceDeck reports only that the command was sent. Hardware verification remains open.
+
 ## 0.7.0-alpha.24 — 2026-11-09
 
 - Show Baseus Bowie 30 as over-ear headphones with a single headset battery indicator, matching its device type in the unified DeviceDeck panel. Bowie MF1 remains an earbud profile.
