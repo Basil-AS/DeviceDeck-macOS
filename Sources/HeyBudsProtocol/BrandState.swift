@@ -85,6 +85,11 @@ public enum BrandState {
             else if c == 0xD3,p.count >= 2 { state.edifierSleepTimerMinutes=UInt16(p[0]) << 8 | UInt16(p[1]);observed=Command.edifierSleepTimer }
             else if c == 0xD7,let enabled=p.first,enabled <= 1 { state.edifierAutoPowerOff=enabled == 1;observed=Command.edifierAutoPowerOff }
             else if c == 0xC9,let name=String(bytes:p.prefix(while:{$0 != 0}),encoding:.utf8),!name.isEmpty { state.edifierBluetoothName=name;observed=Command.edifierBluetoothName }
+            else if c == 0xFD,p.count >= 2,
+                    state.edifierCapabilityReport?.reportedControls.contains("touchSensitivity") == true,
+                    let max=EdifierCapabilityReport.touchSensitivityMaximum(index:p[0]),p[1] <= max {
+                state.edifierTouchSensitivityIndex=p[0];state.edifierTouchSensitivityValue=p[1];observed=Command.edifierTouchSensitivity
+            }
             else if c == 0x08,let enabled=p.first,enabled <= 1 { state.switches[6]=enabled == 1;observed=Command.switches }
             else { return false }
         case .xiaomi:

@@ -99,7 +99,7 @@ import HeyBudsProtocol
     func refresh() async {
         guard ready else { return }
         let token=generation
-        for command in [Command.battery,Command.noise,Command.equalizer,Command.spatial,Command.switches,Command.wear,Command.firmware,Command.hosts,Command.edifierSleepTimer,Command.edifierAutoPowerOff,Command.edifierBluetoothName] where canQuery(command) {
+        for command in [Command.battery,Command.noise,Command.equalizer,Command.spatial,Command.switches,Command.wear,Command.firmware,Command.hosts,Command.edifierSleepTimer,Command.edifierAutoPowerOff,Command.edifierBluetoothName,Command.edifierTouchSensitivity] where canQuery(command) {
             guard !Task.isCancelled,ready,generation == token else { return }
             _ = try? await read(command)
         }
@@ -132,6 +132,7 @@ import HeyBudsProtocol
         case Command.edifierSleepTimer:return family == .edifier && state.edifierCapabilityReport?.sleepTimerOptions.isEmpty == false
         case Command.edifierAutoPowerOff:return family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("autoPowerOff") == true
         case Command.edifierBluetoothName:return family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("readName") == true
+        case Command.edifierTouchSensitivity:return family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("touchSensitivity") == true
         case Command.wear,Command.firmware:return family == .vivo
         default:return false
         }
@@ -204,6 +205,9 @@ import HeyBudsProtocol
             case Command.edifierBluetoothName:
                 guard state.edifierCapabilityReport?.reportedControls.contains("readName") == true else { throw ProtocolError.unsupported }
                 sample = try await readRequest(0xC9)
+            case Command.edifierTouchSensitivity:
+                guard state.edifierCapabilityReport?.reportedControls.contains("touchSensitivity") == true else { throw ProtocolError.unsupported }
+                sample = try await readRequest(0xFD)
             case Command.switches:
                 guard gameFeature != nil || state.edifierCapabilityReport?.reportedControls.contains("gameMode") == true else { throw ProtocolError.unsupported }
                 sample = try await readRequest(0x08)
@@ -373,6 +377,17 @@ import HeyBudsProtocol
               !name.unicodeScalars.contains(where:CharacterSet.controlCharacters.contains),
               name.utf8.count <= (state.edifierCapabilityReport?.bluetoothNameLimitBytes ?? 0) else { throw ProtocolError.unsupported }
         return try await confirmedWrite(command:0xCA,payload:Array(name.utf8),read:Command.edifierBluetoothName) { $0.edifierBluetoothName == name }
+    }
+    func setEdifierTouchSensitivity(_ value:UInt8) async throws -> WriteOutcome {
+        guard family == .edifier,
+              state.edifierCapabilityReport?.reportedControls.contains("touchSensitivity") == true,
+              let index=state.edifierTouchSensitivityIndex,
+              state.edifierTouchSensitivityValue != nil,
+              let maximum=EdifierCapabilityReport.touchSensitivityMaximum(index:index),
+              value <= maximum else { throw ProtocolError.unsupported }
+        return try await confirmedWrite(command:0xFE,payload:[index,value],read:Command.edifierTouchSensitivity) {
+            $0.edifierTouchSensitivityIndex == index && $0.edifierTouchSensitivityValue == value
+        }
     }
     func setSpatial(_ value:UInt8) async throws -> WriteOutcome {
         guard canWrite(Command.setSpatial,reading:Command.spatial),model.spatialModes.contains(value),family == .vivo else { throw ProtocolError.unsupported }

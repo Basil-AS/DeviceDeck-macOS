@@ -406,6 +406,10 @@ public enum WriteOutcome: String, Sendable { case confirmed, sent }
         guard let brandSession else { throw ProtocolError.unsupported }
         return try await brandSession.setEdifierBluetoothName(name)
     }
+    public func setEdifierTouchSensitivity(_ value:UInt8) async throws -> WriteOutcome {
+        guard let brandSession else { throw ProtocolError.unsupported }
+        return try await brandSession.setEdifierTouchSensitivity(value)
+    }
     public func setSonyAmbient(level:Int,focusOnVoice:Bool) async throws -> WriteOutcome {
         guard let sonySession else { throw ProtocolError.unsupported }
         return try await sonySession.setAmbient(level:level,focusOnVoice:focusOnVoice)
