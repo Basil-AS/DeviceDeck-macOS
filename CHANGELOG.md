@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.7.0-alpha.11 — 2026-11-09
 
 - Add the Edifier W820NB Plus scheduled power-off control when D8 reports a timer profile. D3 reads the current minutes; D1 sets a timer and D2 cancels it, with D3 readback after either write. Hardware validation remains pending.
 - 当 D8 报告支持定时功能时，为 Edifier W820NB Plus 显示定时关机控制。D3 读取分钟数；D1 设置、D2 取消，并在写入后通过 D3 回读确认。仍待实机验证。
