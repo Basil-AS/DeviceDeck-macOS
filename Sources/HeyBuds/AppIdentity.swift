@@ -4,7 +4,7 @@ import Foundation
 /// two generations of the app from owning the same earbud control session.
 enum AppIdentity {
     static let name="DeviceDeck"
-    static let version="0.7.0-alpha.22"
+    static let version="0.7.0-alpha.23"
     static let projectURL=URL(string:"https://github.com/Basil-AS/DeviceDeck-macOS")!
     static let releasesURL=projectURL.appendingPathComponent("releases/latest")
     static let bundleID="app.devicedeck.macos"
