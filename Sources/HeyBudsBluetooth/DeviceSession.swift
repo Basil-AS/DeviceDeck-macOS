@@ -398,6 +398,10 @@ public enum WriteOutcome: String, Sendable { case confirmed, sent }
         guard let brandSession else { throw ProtocolError.unsupported }
         return try await brandSession.setEdifierSleepTimer(minutes)
     }
+    public func setEdifierAutoPowerOff(_ enabled:Bool) async throws -> WriteOutcome {
+        guard let brandSession else { throw ProtocolError.unsupported }
+        return try await brandSession.setEdifierAutoPowerOff(enabled)
+    }
     public func setSonyAmbient(level:Int,focusOnVoice:Bool) async throws -> WriteOutcome {
         guard let sonySession else { throw ProtocolError.unsupported }
         return try await sonySession.setAmbient(level:level,focusOnVoice:focusOnVoice)
