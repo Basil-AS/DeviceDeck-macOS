@@ -71,6 +71,8 @@ public struct DeviceState: Sendable {
     public var unassignedBatteries: [UInt8:BatteryReading] = [:]
     /// Raw/scaled telemetry reported by Baseus power accessories.
     public var powerAccessory: [UInt16:DevicePowerReading] = [:]
+    /// Blade 2-140 uses a different vendor-defined protocol code table.
+    public var powerAccessoryBlade2_140 = false
     public var placement: [BatterySlot:UInt8] = [:]
     public var noise: NoiseMode?
     public var liveNoise: NoiseMode?
