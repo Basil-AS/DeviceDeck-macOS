@@ -388,7 +388,7 @@ import HeyBudsProtocol
         guard family == .edifier,
               state.edifierCapabilityReport?.reportedControls.contains("voicePromptLevel") == true,
               state.edifierPromptVolume != nil,
-              level <= 12 else { throw ProtocolError.unsupported }
+              level <= 15 else { throw ProtocolError.unsupported }
         return try await confirmedWrite(command:0x06,payload:[level],read:Command.edifierPromptVolume) { $0.edifierPromptVolume == level }
     }
     func setEdifierBluetoothName(_ name:String) async throws -> WriteOutcome {
