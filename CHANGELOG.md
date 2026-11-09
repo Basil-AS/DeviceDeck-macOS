@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.0-alpha.20 — 2026-11-09
+
+- Add capability-gated EDIFIER W820NB Plus voice prompt volume to the existing DeviceDeck panel. D8 B17 bit 4 gates the control; command 0x05 reads the level, 0x06 sets it within 0–12, and the setting is confirmed by readback. Physical-device verification remains open.
+
 ## 0.7.0-alpha.18 — 2026-11-09
 
 - Add the EDIFIER W820NB Plus prompt tone switch to the existing DeviceDeck macOS controls when D8 B17 bit 1 reports support. F9 reads state; FA writes and F9 confirms the setting. Physical-device verification remains open.
