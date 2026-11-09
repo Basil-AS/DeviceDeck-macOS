@@ -154,8 +154,10 @@ import HeyBudsProtocol
         for button: UInt8 in 0...1 {
             let frame = try await request(0x8C, payload: [button, 0xFF])
             guard frame.payload.count == 9, frame.payload[0] == button else { throw ProtocolError.invalidPayload }
-            for (index, mapping) in gestureLayouts.enumerated() {
-                entries.append(GestureEntry(side: button + 1, mode: 1, gesture: mapping.1, action: frame.payload[2 + index * 2]))
+            for index in 0..<4 {
+                let layout = frame.payload[1 + index * 2]
+                guard let gesture = gestureLayouts.first(where: { $0.0 == layout })?.1 else { throw ProtocolError.invalidPayload }
+                entries.append(GestureEntry(side: button + 1, mode: 1, gesture: gesture, action: frame.payload[2 + index * 2]))
             }
         }
         state.gestures = entries
