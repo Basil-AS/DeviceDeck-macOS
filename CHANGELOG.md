@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.7.0-alpha.18 — 2026-11-09
 
 - Add the EDIFIER W820NB Plus prompt tone switch to the existing DeviceDeck macOS controls when D8 B17 bit 1 reports support. F9 reads state; FA writes and F9 confirms the setting. Physical-device verification remains open.
 
