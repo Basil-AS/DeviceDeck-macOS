@@ -60,6 +60,7 @@ public struct OPOFrameCodec: Sendable {
 public enum Command {
     public static let capabilities: UInt16 = 0x0100, product: UInt16 = 0x0103, firmware: UInt16 = 0x0105
     public static let battery: UInt16 = 0x0106, gestures: UInt16 = 0x0108, wear: UInt16 = 0x0109
+    public static let edifierSleepTimer: UInt16 = 0x00D3
     public static let noise: UInt16 = 0x010C, switches: UInt16 = 0x010D, equalizer: UInt16 = 0x010F
     public static let hosts: UInt16 = 0x0112, codec: UInt16 = 0x0114, customEQ: UInt16 = 0x0122
     public static let bass: UInt16 = 0x0124, spatial: UInt16 = 0x012A, gameSound: UInt16 = 0x012B

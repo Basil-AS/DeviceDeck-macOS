@@ -44,6 +44,12 @@ public struct EdifierCapabilityReport: Equatable, Sendable {
         }
     }
 
+    /// Minute choices exposed by Connect's timer screen for each D8 timer profile.
+    public var sleepTimerOptions: [UInt16] {
+        guard let value=value(9),value > 0 else { return [] }
+        return value == 1 ? [0,10,20,30,60] : [0,5,15,30,60,180]
+    }
+
     /// Only capabilities explicitly represented by D8 are returned. This is
     /// a device report, not proof that DeviceDeck implements the operation.
     public var reportedControls: [String] {

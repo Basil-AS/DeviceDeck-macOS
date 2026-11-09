@@ -641,6 +641,16 @@ struct PanelView: View {
             if hasGameControls {
                 settingsGroup(L("游戏","Gaming")) { gameControls }
             }
+            if let report=app.state.edifierCapabilityReport,!report.sleepTimerOptions.isEmpty,
+               let current=app.state.edifierSleepTimerMinutes {
+                settingsGroup(L("电源","Power")) {
+                    Picker(L("Таймер выключения","Sleep timer"),selection:Binding(get:{current},set:{ minutes in app.perform { try await $0.setEdifierSleepTimer(minutes) } })) {
+                        ForEach(report.sleepTimerOptions,id:\.self) { minutes in
+                            Text(minutes == 0 ? L("Выключено","Off") : L("\(minutes) мин","\(minutes) min")).tag(minutes)
+                        }
+                    }
+                }
+            }
             if hasEarbudControls {
                 settingsGroup(L("佩戴与操作","Wearing & controls")) { earbudControls }
             }
