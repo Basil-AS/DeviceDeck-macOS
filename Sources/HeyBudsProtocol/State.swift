@@ -47,6 +47,9 @@ public struct BassState: Equatable, Sendable {
 }
 public struct GestureEntry: Equatable, Identifiable, Sendable {
     public let side: UInt8, mode: UInt8, gesture: UInt8, action: UInt8
+    public init(side: UInt8, mode: UInt8, gesture: UInt8, action: UInt8) {
+        self.side = side; self.mode = mode; self.gesture = gesture; self.action = action
+    }
     public var id: String { "\(side)-\(mode)-\(gesture)" }
 }
 public struct DeviceState: Sendable {
