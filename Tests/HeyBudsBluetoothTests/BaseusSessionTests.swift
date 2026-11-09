@@ -10,6 +10,7 @@ import HeyBudsProtocol
     var packets: [Data] = []
     var mode: UInt8 = 0
     var level: UInt8 = 0xFF
+    var gestures: [UInt8: [UInt8: UInt8]] = [0: [3:1, 0:1, 1:2, 2:6], 1: [3:1, 0:1, 1:3, 2:6]]
     func open() async throws { active = true }
     func close() { active = false }
     func send(_ data: Data) async throws {
@@ -25,6 +26,13 @@ import HeyBudsProtocol
             mode = bytes[2]
             level = bytes[3]
             reply = [0xAA, 0x34, 1]
+        case 0x8C:
+            let button = bytes[2]
+            reply = [0xAA, 0x8C, button, 3, gestures[button]?[3] ?? 0, 0, gestures[button]?[0] ?? 0,
+                     1, gestures[button]?[1] ?? 0, 2, gestures[button]?[2] ?? 0]
+        case 0x8D:
+            gestures[bytes[2], default: [:]][bytes[3]] = bytes[4]
+            reply = [0xAA, 0x8D, 1]
         default: throw ProtocolError.unsupported
         }
         onEvent?(.data(Data(reply)))
@@ -143,6 +151,10 @@ import HeyBudsProtocol
         #expect(session.state.batteries[.left]?.percent == 90)
         #expect(session.state.batteries[.right]?.percent == 80)
         #expect(session.state.noise == .off)
+        #expect(session.canWrite(Command.setGestures, reading: Command.gestures))
+        let leftDouble = try #require(session.state.gestures.first { $0.side == 1 && $0.gesture == 2 })
+        #expect(try await session.setGesture(leftDouble, action: 2) == .confirmed)
+        #expect(session.state.gestures.first { $0.id == leftDouble.id }?.action == 2)
         #expect(session.canWrite(Command.setNoise))
         #expect(try await session.setNoise(.anc) == .confirmed)
         #expect(session.state.noise == .anc)
