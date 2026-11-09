@@ -550,6 +550,26 @@ struct PanelView: View {
                     ForEach(Array(Set((app.session?.gestureActions(entry) ?? [])+[entry.action])).sorted(),id:\.self) { Text(actionLabel($0,family:app.model?.family)).tag($0) }
                 }.labelsHidden().frame(maxWidth:138).disabled(app.operationBusy)
                     .accessibilityLabel((entry.side == 1 ? L("左耳 · ","Left · ") : L("右耳 · ","Right · "))+gestureLabel(entry.gesture))
+                if entry.action == 6, app.model?.id == "baseus:bass-ep10-pro" {
+                    let selected = app.state.gestureChildren[entry.id] ?? []
+                    Menu {
+                        ForEach(0...2, id:\.self) { rawValue in
+                            let value = UInt8(rawValue)
+                            let title = [L("Обычный режим","Normal"), L("Шумоподавление","ANC"), L("Прозрачность","Transparency")][rawValue]
+                            Button {
+                                var next = selected
+                                if next.contains(value) {
+                                    guard next.count > 2 else { return }
+                                    next.removeAll { $0 == value }
+                                } else { next.append(value) }
+                                app.perform { try await $0.setGestureChildren(entry, selected: next) }
+                            } label: { Label(title, systemImage: selected.contains(value) ? "checkmark.circle.fill" : "circle") }
+                        }
+                    } label: {
+                        Image(systemName:"slider.horizontal.3").frame(width:28,height:28)
+                    }.menuStyle(.borderlessButton).disabled(app.operationBusy || selected.count < 2)
+                        .help(L("Режимы, переключаемые жестом","Modes cycled by this gesture"))
+                }
             }.padding(.vertical,6)
         }
         if canFind {
@@ -1096,5 +1116,6 @@ func featureLabel(_ key:String) -> String {
 func gestureLabel(_ value:UInt8) -> String { [1:L("单击","Single press"),2:L("双击","Double press"),3:L("三击","Triple press"),4:L("长按","Hold"),5:L("滑动","Swipe")][Int(value)] ?? L("手势 ","Gesture ")+String(value) }
 func actionLabel(_ value:UInt8,family:EarbudFamily?=nil) -> String {
     if family == .xiaomi,let label=[0x30:L("增大音量","Volume up"),0x31:L("减小音量","Volume down"),0x32:L("切换降噪模式","Cycle noise modes")][Int(value)] { return label }
+    if family == .baseus,let label=[1:L("播放／暂停","Play / pause"),2:L("上一首","Previous track"),3:L("下一首","Next track"),4:L("语音助手","Voice assistant"),6:L("切换降噪模式","Cycle noise modes"),11:L("增大音量","Volume up"),12:L("减小音量","Volume down")][Int(value)] { return label }
     return [0:L("无","None"),1:L("播放／暂停","Play / pause"),3:L("语音助手","Voice assistant"),5:L("上一首","Previous track"),6:L("下一首","Next track"),7:L("音量","Volume"),10:L("切换歌曲","Skip track"),17:L("游戏模式","Game mode")][Int(value)] ?? L("操作 ","Action ")+String(value)
 }

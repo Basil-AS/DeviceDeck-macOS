@@ -550,6 +550,10 @@ public enum WriteOutcome: String, Sendable { case confirmed, sent }
             sample.gestures.contains { $0.id == entry.id && $0.action == action }
         }
     }
+    public func setGestureChildren(_ entry:GestureEntry, selected:[UInt8]) async throws -> WriteOutcome {
+        guard let additionalSession else { throw ProtocolError.unsupported }
+        return try await additionalSession.setGestureChildren(entry,selected:selected)
+    }
     public func gestureActions(_ entry:GestureEntry) -> [UInt8] {
         if let additionalSession { return additionalSession.gestureActions(entry) }
         guard brandSession == nil else { return [] }

@@ -16,6 +16,8 @@ import HeyBudsProtocol
     private var generation = UUID()
     private var poll: Task<Void, Never>?
     private var noiseType: UInt8?
+    private var supportsGestures: Bool { model?.id == "baseus:bass-ep10-pro" }
+    private let gestureLayouts: [(UInt8, UInt8)] = [(3, 1), (0, 2), (1, 3), (2, 4)]
 
     private var isBowie30: Bool { model?.id == "baseus:bowie-30" }
     private var isBowieMF1: Bool { model?.id == "baseus:bowie-mf1" }
@@ -51,6 +53,7 @@ import HeyBudsProtocol
             try await channel.open()
             try await readBattery()
             if supportsNoise { _ = try await readNoise() }
+            if supportsGestures { try? await readGestures() }
             guard generation == token else { throw ProtocolError.disconnected }
             ready = true
             onChange?()
@@ -83,6 +86,7 @@ import HeyBudsProtocol
             guard ready else { return }
             try await readBattery()
             if supportsNoise { _ = try await readNoise() }
+            if supportsGestures { try? await readGestures() }
         } catch {
             if ready { close(); onClose?(error.localizedDescription) }
         }
@@ -134,12 +138,79 @@ import HeyBudsProtocol
     }
 
     func canQuery(_ command: UInt16) -> Bool {
-        command == Command.battery || (supportsNoise && command == Command.noise)
+        command == Command.battery || (supportsNoise && command == Command.noise) || (supportsGestures && command == Command.gestures)
     }
 
     func canWrite(_ command: UInt16, reading: UInt16?) -> Bool {
-        ready && supportsNoise && command == Command.setNoise &&
+        if command == Command.setGestures {
+            return ready && supportsGestures && (reading == nil || reading == Command.gestures) && state.observedQueries.contains(Command.gestures)
+        }
+        return ready && supportsNoise && command == Command.setNoise &&
             (reading == nil || reading == Command.noise) && state.observedQueries.contains(Command.noise)
+    }
+
+    private func readGestures() async throws {
+        var entries: [GestureEntry] = []
+        for button: UInt8 in 0...1 {
+            let frame = try await request(0x8C, payload: [button, 0xFF])
+            guard frame.payload.count == 9, frame.payload[0] == button else { throw ProtocolError.invalidPayload }
+            for index in 0..<4 {
+                let layout = frame.payload[1 + index * 2]
+                guard let gesture = gestureLayouts.first(where: { $0.0 == layout })?.1 else { throw ProtocolError.invalidPayload }
+                let entry = GestureEntry(side: button + 1, mode: 1, gesture: gesture, action: frame.payload[2 + index * 2])
+                entries.append(entry)
+                if entry.action == 6 { _ = try? await readGestureChildren(entry, button: button, layout: layout) }
+            }
+        }
+        state.gestures = entries
+        state.observedQueries.insert(Command.gestures)
+        onChange?()
+    }
+
+    func gestureActions(_ entry: GestureEntry) -> [UInt8] {
+        guard supportsGestures, entry.mode == 1, (1...2).contains(entry.side),
+              gestureLayouts.contains(where: { $0.1 == entry.gesture }) else { return [] }
+        return entry.gesture == 1 ? [0, 1] : [0, 1, 2, 3, 4, 6, 11, 12]
+    }
+
+    func setGesture(_ entry: GestureEntry, action: UInt8) async throws -> WriteOutcome {
+        guard canWrite(Command.setGestures, reading: Command.gestures), gestureActions(entry).contains(action),
+              let layout = gestureLayouts.first(where: { $0.1 == entry.gesture })?.0,
+              state.gestures.contains(where: { $0.id == entry.id }) else { throw ProtocolError.unsupported }
+        try await operations.acquire()
+        defer { operations.release() }
+        let ack = try await request(0x8D, payload: [entry.side - 1, layout, action])
+        guard ack.payload.first == 1 else { throw ProtocolError.rejected(ack.payload.first ?? 0) }
+        try await readGestures()
+        guard state.gestures.first(where: { $0.id == entry.id })?.action == action else { throw ProtocolError.readbackMismatch }
+        return .confirmed
+    }
+
+    func setGestureChildren(_ entry: GestureEntry, selected: [UInt8]) async throws -> WriteOutcome {
+        guard canWrite(Command.setGestures, reading: Command.gestures), entry.action == 6,
+              selected.count >= 2, selected.count <= 3, Set(selected).count == selected.count,
+              selected.allSatisfy({ [UInt8(0),1,2].contains($0) }),
+              let layout = gestureLayouts.first(where: { $0.1 == entry.gesture })?.0,
+              state.gestures.contains(where: { $0.id == entry.id && $0.action == 6 }) else { throw ProtocolError.unsupported }
+        try await operations.acquire()
+        defer { operations.release() }
+        let button = entry.side - 1
+        let ack = try await request(0x8F, payload: [button, layout, 6, UInt8(selected.count)] + selected)
+        guard ack.payload.first == 1 else { throw ProtocolError.rejected(ack.payload.first ?? 0) }
+        let confirmed = try await readGestureChildren(entry, button: button, layout: layout)
+        guard confirmed == selected else { throw ProtocolError.readbackMismatch }
+        return .confirmed
+    }
+
+    @discardableResult private func readGestureChildren(_ entry: GestureEntry, button: UInt8, layout: UInt8) async throws -> [UInt8] {
+        let frame = try await request(0x8E, payload: [button, layout, 6])
+        guard frame.payload.count >= 4, frame.payload[0] == button, frame.payload[1] == layout,
+              frame.payload[2] == 6, frame.payload[3] >= 2, frame.payload.count == 4 + Int(frame.payload[3]) else { throw ProtocolError.invalidPayload }
+        let selected = Array(frame.payload.dropFirst(4))
+        guard Set(selected).count == selected.count, selected.allSatisfy({ [UInt8(0),1,2].contains($0) }) else { throw ProtocolError.invalidPayload }
+        state.gestureChildren[entry.id] = selected
+        onChange?()
+        return selected
     }
 
     func setNoise(_ mode: NoiseMode) async throws -> WriteOutcome {
@@ -209,7 +280,11 @@ struct BaseusFrameCodec {
             let length: Int
             switch buffer[1] {
             case 0x02, 0x33: length = 6
-            case 0x34, 0x35: length = 3
+            case 0x34, 0x35, 0x8B, 0x8D, 0x8F: length = 3
+            case 0x8C: length = 11
+            case 0x8E:
+                if buffer.count < 6 { return frames }
+                length = 6 + Int(buffer[5])
             default: buffer.removeFirst(); continue
             }
             guard buffer.count >= length else { break }
