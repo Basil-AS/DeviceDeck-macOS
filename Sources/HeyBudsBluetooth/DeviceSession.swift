@@ -387,6 +387,10 @@ public enum WriteOutcome: String, Sendable { case confirmed, sent }
         guard let backend=additionalSession as? BaseusBlade2Session else { throw ProtocolError.unsupported }
         return try await backend.setText(value)
     }
+    public func restoreBaseusPowerDefaults() async throws -> WriteOutcome {
+        guard let backend=additionalSession as? BaseusBlade2Session else { throw ProtocolError.unsupported }
+        return try await backend.restoreDefaults()
+    }
     public func setEQ(_ id:UInt8) async throws -> WriteOutcome {
         if let additionalSession { return try await additionalSession.setEQ(id) }
         if let brandSession { return try await brandSession.setEQ(id) }
