@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.7.0-alpha.16 — 2026-11-09
 
 - Add Edifier W820NB Plus touch-sensitivity controls to the existing shared DeviceDeck hub when D8 byte 17 bit 3 reports support. Query FD; write indexed values with FE using the Edifier ranges (index 1: 0–31, index 2: 0–15), then confirm through FD readback. Physical-device behavior remains unverified.
 
