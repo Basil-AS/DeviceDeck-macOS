@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.0-alpha.26 — 2026-11-10
+
+- Add the realme Buds Air7 Pro dual-device connection switch to the unified DeviceDeck macOS app. DeviceDeck exposes the multipoint toggle; connected-device management is not mapped. Hardware verification remains open.
+
 ## 0.7.0-alpha.25 — 2026-11-09
 
 - Add the Baseus Intelligent Blade 2 factory-reset command to the existing DeviceDeck power-accessory panel. Require explicit confirmation; the vendor app provides no reset acknowledgement or readback, so DeviceDeck reports only that the command was sent. Hardware verification remains open.

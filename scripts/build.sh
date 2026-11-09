@@ -96,8 +96,8 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
 <key>CFBundleName</key><string>DeviceDeck</string>
 <key>CFBundleDisplayName</key><string>DeviceDeck</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>0.7.0-alpha.25</string>
-<key>CFBundleVersion</key><string>38</string>
+<key>CFBundleShortVersionString</key><string>0.7.0-alpha.26</string>
+<key>CFBundleVersion</key><string>39</string>
 <key>CFBundleDevelopmentRegion</key><string>zh-Hans</string>
 <key>CFBundleLocalizations</key><array><string>zh-Hans</string><string>en</string></array>
 <key>CFBundleIconFile</key><string>DeviceDeck.icns</string>
