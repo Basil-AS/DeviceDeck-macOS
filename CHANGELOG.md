@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0-alpha.10 — 2026-11-09
+
+- Add capability-gated W820NB Plus preset EQ in the unified DeviceDeck app. The D8 profile selects the known preset layout, D5 reads the current preset, and C4 writes a selected preset followed by a separate readback. Unsupported profile layouts are not exposed. Hardware validation remains pending.
+
+- 在统一的 DeviceDeck 应用中加入 W820NB Plus 均衡器预设。D8 能力配置决定可用预设，D5 查询当前值，C4 写入后再单独读取确认。不支持的配置不显示；仍需实机验证。
+
 ## 0.7.0-alpha.9 — 2026-11-09
 
 - Add model-specific gesture action maps for realme Buds Air 7 and Air 7 Pro in the unified macOS app. Exposed actions are limited to those in the reviewed vendor catalog; command behavior and readback still require physical-device validation.
@@ -25,8 +31,6 @@
 
 ## Unreleased
 
-- Add capability-gated Air 7/Air 7 Pro gesture controls to the unified macOS app using the reviewed Android model mappings. Runtime readback still needs the actual earbuds.
-- Add W820NB Plus preset EQ from the reported D8 profile: query current preset with `0xD5`, write the selected preset with `0xC4`, then confirm through a fresh read. Only profile layouts understood by EDIFIER Connect are exposed; physical-device validation remains pending.
 ## 0.7.0-alpha.5 — 2026-11-08
 
 - Add Baseus Bowie MF1 left/right battery reading over RFCOMM/SPP in the unified DeviceDeck app. No undocumented noise-mode controls are shown. Physical-device verification remains pending.
