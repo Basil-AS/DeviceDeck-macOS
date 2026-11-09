@@ -61,7 +61,7 @@ private func bytes(_ string:String) -> [UInt8] { string.split(separator:" ").map
     #expect([NoiseMode.off,.transparency,.light,.deep,.medium,.smart].allSatisfy { mode in air.noiseOptions.contains(where:{$0.mode == mode}) })
     #expect(air.presets.map(\.id) == [103,101,104,102])
     #expect(air.supportsGame && pro.supportsGame && air.gameTypes.isEmpty && pro.gameTypes.isEmpty)
-    #expect(air.hasMultiDevice && !pro.hasMultiDevice)
+    #expect(air.hasMultiDevice && pro.hasMultiDevice)
     #expect(air.function["findDevice"].enabled && pro.function["findDevice"].enabled)
     #expect(air.function["control"].elements.count == 3)
     #expect(pro.function["control"].elements.count == 3)
