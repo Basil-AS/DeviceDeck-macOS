@@ -98,10 +98,10 @@ private func hex(_ string:String) -> [UInt8] { string.split(separator:" ").map {
     var payload=[UInt8](repeating:0,count:18);payload[17]=0x10
     var state=DeviceState()
     #expect(BrandState.apply(BrandFrame(0xD8,payload),model:model,to:&state))
-    #expect(BrandState.apply(BrandFrame(0x05,[12]),model:model,to:&state))
-    #expect(state.edifierPromptVolume == 12)
+    #expect(BrandState.apply(BrandFrame(0x05,[15]),model:model,to:&state))
+    #expect(state.edifierPromptVolume == 15)
     #expect(state.observedQueries.contains(Command.edifierPromptVolume))
-    #expect(!BrandState.apply(BrandFrame(0x05,[13]),model:model,to:&state))
+    #expect(!BrandState.apply(BrandFrame(0x05,[16]),model:model,to:&state))
 }
 @Test func goldenBrandFramesAndEveryStreamSplit() throws {
     let fixtures:[(EarbudFamily,UInt8,Bool,BrandFrame,[UInt8])]=[
