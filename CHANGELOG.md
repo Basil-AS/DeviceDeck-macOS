@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.0-alpha.13 — 2026-11-09
+
+- Add Baseus EP10 Pro gesture assignment controls to the unified DeviceDeck macOS app. Configure the Normal/ANC/Transparency choices for “Cycle noise modes”; BA8E readback confirms BA8F writes.
+- Hardware round-trip validation on a physical EP10 Pro remains pending.
+
 ## 0.7.0-alpha.12 — 2026-11-09
 
 - Add Baseus Blade 2 USB-C C1/C2 mode controls for Off, Output/Discharge, and Input/Charge. Read `0x0010` before changing a port, use the APK-mapped `0x0018`–`0x001B` commands, then confirm the resulting mode with a fresh status read. Hardware behavior remains unverified.

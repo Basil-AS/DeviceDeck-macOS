@@ -235,7 +235,7 @@ This list follows the current app catalog. Duplicate display names are merged an
 
 ## Baseus
 
-- Bass EP10 Pro — macOS 初步 SPP 控制：左右耳电量、关闭/ANC/通透。切换后以状态查询回读；协议来源与限制见 [Baseus 说明](licenses/Baseus.md)。尚未实机验证。 / Initial macOS SPP support: left/right battery and Off/ANC/Transparency with state readback. Hardware validation is pending.
+- Bass EP10 Pro — macOS SPP controls in DeviceDeck: left/right battery, Off/ANC/Transparency, gesture assignments, and Normal/ANC/Transparency cycle-mode choices. BA8D primary actions and BA8F child selections are checked with BA8C/BA8E readback. Protocol source and limits: [Baseus notes](licenses/Baseus.md). Hardware validation is pending.
 - Bowie 30 — macOS 初步 BLE 控制：电量、噪声状态、关闭/通勤/室内/户外降噪/通透，写入后回读。实机验证仍待完成。 / Initial macOS BLE support: battery/noise state and Off/Commute/Indoor/Outdoor ANC/Transparency with readback. Hardware validation remains outstanding.
 - Bowie MF1 — macOS 初步 SPP 电量读取（BA02）；尚未确认噪声/手势控制映射，因此不开放。硬件验证仍待完成。 / Initial macOS SPP battery reading (BA02); noise/gesture mappings are unresolved and remain unavailable. Hardware validation is pending.
 - Blade 2 — macOS BLE 电压/电流/功率遥测、电芯信息（Blade 2-140）、USB-C C1/C2 输入/输出/关闭、屏幕主题/保护/文字及提醒/自动关机设置；端口和数值设置通过状态回读确认。屏幕文字没有回读，所有控制仍需实机验证。 / macOS BLE voltage/current/power telemetry, Blade 2-140 cell data, USB-C C1/C2 input/output/off controls, display theme/saver/text and reminder/shutdown controls; port modes and numeric settings use status readback. Text has no readback. Hardware validation is pending.
