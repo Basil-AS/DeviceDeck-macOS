@@ -390,6 +390,10 @@ public enum WriteOutcome: String, Sendable { case confirmed, sent }
         if model?.gameBlocksEQ == true, (state.gameSound ?? 0) > 0 { _ = try await setGameSound(0) }
         return try await write(Command.setEQ,payload:[id],read:Command.equalizer) { $0.eq == id }
     }
+    public func setEdifierSleepTimer(_ minutes:UInt16) async throws -> WriteOutcome {
+        guard let brandSession else { throw ProtocolError.unsupported }
+        return try await brandSession.setEdifierSleepTimer(minutes)
+    }
     public func setSonyAmbient(level:Int,focusOnVoice:Bool) async throws -> WriteOutcome {
         guard let sonySession else { throw ProtocolError.unsupported }
         return try await sonySession.setAmbient(level:level,focusOnVoice:focusOnVoice)
