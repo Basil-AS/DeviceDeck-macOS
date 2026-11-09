@@ -11,6 +11,7 @@ import HeyBudsProtocol
     var mode: UInt8 = 0
     var level: UInt8 = 0xFF
     var gestures: [UInt8: [UInt8: UInt8]] = [0: [3:1, 0:1, 1:2, 2:6], 1: [3:1, 0:1, 1:3, 2:6]]
+    var gestureChildren: [String: [UInt8]] = ["0:2": [1, 2, 0], "1:2": [1, 2, 0]]
     func open() async throws { active = true }
     func close() { active = false }
     func send(_ data: Data) async throws {
@@ -33,6 +34,15 @@ import HeyBudsProtocol
         case 0x8D:
             gestures[bytes[2], default: [:]][bytes[3]] = bytes[4]
             reply = [0xAA, 0x8D, 1]
+        case 0x8E:
+            let key = "\(bytes[2]):\(bytes[3])"
+            let children = gestureChildren[key] ?? [1, 2, 0]
+            reply = [0xAA, 0x8E, bytes[2], bytes[3], bytes[4], UInt8(children.count)] + children
+        case 0x8F:
+            let key = "\(bytes[2]):\(bytes[3])"
+            let count = Int(bytes[5])
+            gestureChildren[key] = Array(bytes[6..<(6 + count)])
+            reply = [0xAA, 0x8F, 1]
         default: throw ProtocolError.unsupported
         }
         onEvent?(.data(Data(reply)))

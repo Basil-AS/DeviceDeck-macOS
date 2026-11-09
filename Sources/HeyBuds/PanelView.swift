@@ -550,6 +550,26 @@ struct PanelView: View {
                     ForEach(Array(Set((app.session?.gestureActions(entry) ?? [])+[entry.action])).sorted(),id:\.self) { Text(actionLabel($0,family:app.model?.family)).tag($0) }
                 }.labelsHidden().frame(maxWidth:138).disabled(app.operationBusy)
                     .accessibilityLabel((entry.side == 1 ? L("左耳 · ","Left · ") : L("右耳 · ","Right · "))+gestureLabel(entry.gesture))
+                if entry.action == 6, app.model?.id == "baseus:bass-ep10-pro" {
+                    let selected = app.state.gestureChildren[entry.id] ?? []
+                    Menu {
+                        ForEach(0...2, id:\.self) { rawValue in
+                            let value = UInt8(rawValue)
+                            let title = [L("Обычный режим","Normal"), L("Шумоподавление","ANC"), L("Прозрачность","Transparency")][rawValue]
+                            Button {
+                                var next = selected
+                                if next.contains(value) {
+                                    guard next.count > 2 else { return }
+                                    next.removeAll { $0 == value }
+                                } else { next.append(value) }
+                                app.perform { try await $0.setGestureChildren(entry, selected: next) }
+                            } label: { Label(title, systemImage: selected.contains(value) ? "checkmark.circle.fill" : "circle") }
+                        }
+                    } label: {
+                        Image(systemName:"slider.horizontal.3").frame(width:28,height:28)
+                    }.menuStyle(.borderlessButton).disabled(app.operationBusy || selected.count < 2)
+                        .help(L("Режимы, переключаемые жестом","Modes cycled by this gesture"))
+                }
             }.padding(.vertical,6)
         }
         if canFind {

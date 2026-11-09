@@ -134,6 +134,7 @@ import HeyBudsProtocol
     func saveEQ(_ entry:CustomEQEntry) async throws -> WriteOutcome
     func gestureActions(_ entry:GestureEntry) -> [UInt8]
     func setGesture(_ entry:GestureEntry,action:UInt8) async throws -> WriteOutcome
+    func setGestureChildren(_ entry:GestureEntry,selected:[UInt8]) async throws -> WriteOutcome
     func canOperateHost(_ operation:FeatureCodec.HostOperation,host:RemoteHost?) -> Bool
     func hostAction(_ operation:FeatureCodec.HostOperation,host:RemoteHost?) async throws -> WriteOutcome
 }
@@ -144,6 +145,7 @@ extension AdditionalSession {
     func saveEQ(_ entry:CustomEQEntry) async throws -> WriteOutcome { throw ProtocolError.unsupported }
     func gestureActions(_ entry:GestureEntry) -> [UInt8] { [] }
     func setGesture(_ entry:GestureEntry,action:UInt8) async throws -> WriteOutcome { throw ProtocolError.unsupported }
+    func setGestureChildren(_ entry:GestureEntry,selected:[UInt8]) async throws -> WriteOutcome { throw ProtocolError.unsupported }
     func canOperateHost(_ operation:FeatureCodec.HostOperation,host:RemoteHost?) -> Bool { false }
     func hostAction(_ operation:FeatureCodec.HostOperation,host:RemoteHost?) async throws -> WriteOutcome { throw ProtocolError.unsupported }
 }

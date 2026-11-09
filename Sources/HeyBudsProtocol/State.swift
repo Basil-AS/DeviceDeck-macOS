@@ -77,6 +77,8 @@ public struct DeviceState: Sendable {
     public var automaticPriority: Bool?
     public var priorityAddress: [UInt8]?
     public var gestures: [GestureEntry] = []
+    /// Baseus EP10 Pro cycle-noise-mode child selections, keyed by gesture id.
+    public var gestureChildren: [String:[UInt8]] = [:]
     public var supportedCommands: Set<UInt16>?
     /// Raw Edifier D8 capability payload. Preserve unknown bits for diagnostics
     /// instead of interpreting undocumented fields as enabled controls.
