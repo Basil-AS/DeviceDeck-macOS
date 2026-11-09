@@ -103,6 +103,9 @@ import HeyBudsProtocol
             guard !Task.isCancelled,ready,generation == token else { return }
             _ = try? await read(command)
         }
+        if family == .edifier,state.edifierCapabilityReport?.supportsW820NBPlusTouchControls == true {
+            for index in UInt8(1)...4 { guard ready,!Task.isCancelled else { return }; _ = try? await readRequest(0xF0,payload:[index]) }
+        }
         let stale=state.batteries.filter { Date().timeIntervalSince($0.value.updatedAt) >= 120 }.map(\.key)
         for slot in stale { state.batteries[slot]=nil }
         if !stale.isEmpty { onChange?() }
@@ -388,6 +391,26 @@ import HeyBudsProtocol
         return try await confirmedWrite(command:0xFE,payload:[index,value],read:Command.edifierTouchSensitivity) {
             $0.edifierTouchSensitivityIndex == index && $0.edifierTouchSensitivityValue == value
         }
+    }
+    func setEdifierTouchControl(index:UInt8,action:UInt8,noiseModes:[UInt8]=[]) async throws -> WriteOutcome {
+        guard family == .edifier,state.edifierCapabilityReport?.supportsW820NBPlusTouchControls == true,
+              (1...4).contains(index),(1...6).contains(action) else { throw ProtocolError.unsupported }
+        var payload:[UInt8]=[index]
+        let expectedMask:UInt8?
+        if action == 6 {
+            guard (2...3).contains(noiseModes.count),Set(noiseModes).count == noiseModes.count,
+                  noiseModes.allSatisfy({$0 <= 4}) else { throw ProtocolError.unsupported }
+            let mask=noiseModes.reduce(UInt8(0)) { $0 | (1 << $1) }
+            payload += [mask,noiseModes.last!];expectedMask=mask
+        } else {
+            guard noiseModes.isEmpty else { throw ProtocolError.unsupported }
+            payload.append(action);expectedMask=nil
+        }
+        try await send(0xF1,payload:payload)
+        try await Task.sleep(for:.milliseconds(250))
+        _ = try await readRequest(0xF0,payload:[index])
+        guard let actual=state.edifierTouchControls.first(where:{$0.index == index}),actual.action == action,actual.noiseMask == expectedMask else { throw ProtocolError.readbackMismatch }
+        return .confirmed
     }
     func setSpatial(_ value:UInt8) async throws -> WriteOutcome {
         guard canWrite(Command.setSpatial,reading:Command.spatial),model.spatialModes.contains(value),family == .vivo else { throw ProtocolError.unsupported }

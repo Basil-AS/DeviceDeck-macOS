@@ -736,6 +736,10 @@ struct PanelView: View {
                 }
                 .onAppear { edifierTouchSensitivityDraft=Int(current) }
             }
+            if app.state.edifierCapabilityReport?.supportsW820NBPlusTouchControls == true,
+               app.state.edifierTouchControls.count == 4 {
+                settingsGroup(L("触控操作","Touch controls")) { edifierTouchControls }
+            }
             if hasEarbudControls {
                 settingsGroup(L("佩戴与操作","Wearing & controls")) { earbudControls }
             }
@@ -757,6 +761,56 @@ struct PanelView: View {
                     .foregroundStyle(.secondary)
             }
         }
+    }
+    private var edifierTouchControls:some View {
+        VStack(alignment:.leading,spacing:10) {
+            ForEach(app.state.edifierTouchControls) { control in
+                VStack(alignment:.leading,spacing:8) {
+                    Picker(edifierTouchSlot(control.index),selection:Binding(get:{Int(control.action)},set:{ action in
+                        let modes=control.noiseMask.map { mask in (0...4).filter { mask & (1 << $0) != 0 }.map(UInt8.init) } ?? []
+                        let selected=action == 6 ? (modes.count >= 2 ? modes : [0,1]) : []
+                        app.perform { try await $0.setEdifierTouchControl(index:control.index,action:UInt8(action),noiseModes:selected) }
+                    })) {
+                        ForEach(1...6,id:\.self) { action in Text(edifierTouchAction(action,index:control.index)).tag(action) }
+                    }
+                    if control.action == 6,let mask=control.noiseMask {
+                        let selected=(0...4).filter { mask & (1 << $0) != 0 }.map(UInt8.init)
+                        ForEach(0...4,id:\.self) { mode in
+                            let checked=selected.contains(UInt8(mode))
+                            Button {
+                                var next=selected
+                                if checked { next.removeAll { $0 == UInt8(mode) } } else { next.append(UInt8(mode)) }
+                                guard (2...3).contains(next.count) else { return }
+                                app.perform { try await $0.setEdifierTouchControl(index:control.index,action:6,noiseModes:next) }
+                            } label: {
+                                Label(edifierTouchNoiseMode(mode),systemImage:checked ? "checkmark.circle.fill" : "circle")
+                                    .frame(maxWidth:.infinity,alignment:.leading)
+                            }
+                            .buttonStyle(.plain).disabled(!checked && selected.count >= 3 || checked && selected.count <= 2 || !app.ready || app.operationBusy)
+                        }
+                    }
+                }
+                if control.index != 4 { Divider() }
+            }
+            Text(L("Команды доступны по профилю D8; после изменения DeviceDeck повторно считывает назначение.","Controls appear only for D8 profile 18; DeviceDeck reads each assignment back after a change."))
+                .font(.system(size:10)).foregroundStyle(.tertiary)
+        }
+    }
+    private func edifierTouchSlot(_ index:UInt8)->String {
+        switch index { case 1:return L("Левое · одно касание","Left · single tap");case 2:return L("Правое · одно касание","Right · single tap");case 3:return L("Левое · удержание","Left · long press");default:return L("Правое · удержание","Right · long press") }
+    }
+    private func edifierTouchAction(_ action:Int,index:UInt8)->String {
+        switch action {
+        case 1:return L("Воспроизведение / пауза","Play / pause")
+        case 2:return index == 1 || index == 3 ? L("Громче","Volume up") : L("Тише","Volume down")
+        case 3:return index == 1 || index == 3 ? L("Предыдущий трек","Previous track") : L("Следующий трек","Next track")
+        case 4:return L("Голосовой помощник","Voice assistant")
+        case 5:return L("Игровой / звуковой режим","Game / sound mode")
+        default:return L("Переключение режимов шумоподавления","Cycle noise modes")
+        }
+    }
+    private func edifierTouchNoiseMode(_ mode:Int)->String {
+        switch mode { case 0:return L("Сильное шумоподавление","High noise cancelling");case 1:return L("Среднее шумоподавление","Medium noise cancelling");case 2:return L("Прозрачность","Ambient sound");case 3:return L("Обычный режим","Normal mode");default:return L("Подавление ветра","Wind reduction") }
     }
     private var settingsPage:some View {
         VStack(alignment:.leading,spacing:12) {

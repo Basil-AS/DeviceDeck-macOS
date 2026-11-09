@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add the EDIFIER W820NB Plus tap and long-press assignment panel inside the existing DeviceDeck app. D8 profile 18 gates F0 reads and F1 writes; the interface exposes the Connect-derived side-specific actions and multi-select noise-cycle settings with readback. Physical headset verification remains open.
+
 ## 0.7.0-alpha.16 — 2026-11-09
 
 - Add Edifier W820NB Plus touch-sensitivity controls to the existing shared DeviceDeck hub when D8 byte 17 bit 3 reports support. Query FD; write indexed values with FE using the Edifier ranges (index 1: 0–31, index 2: 0–15), then confirm through FD readback. Physical-device behavior remains unverified.

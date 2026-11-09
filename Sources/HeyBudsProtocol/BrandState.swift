@@ -90,6 +90,16 @@ public enum BrandState {
                     let max=EdifierCapabilityReport.touchSensitivityMaximum(index:p[0]),p[1] <= max {
                 state.edifierTouchSensitivityIndex=p[0];state.edifierTouchSensitivityValue=p[1];observed=Command.edifierTouchSensitivity
             }
+            else if c == 0xF0,p.count >= 2,
+                    state.edifierCapabilityReport?.supportsW820NBPlusTouchControls == true,
+                    (1...4).contains(p[0]), (1...6).contains(p[1]),
+                    (p[1] == 6 ? p.count == 3 && p[2] & 0xE0 == 0 && (2...3).contains(p[2].nonzeroBitCount) : p.count == 2) {
+                let control=EdifierTouchControl(index:p[0],action:p[1],noiseMask:p[1] == 6 ? p[2] : nil)
+                state.edifierTouchControls.removeAll { $0.index == control.index }
+                state.edifierTouchControls.append(control)
+                state.edifierTouchControls.sort { $0.index < $1.index }
+                observed=Command.edifierTouchControls
+            }
             else if c == 0x08,let enabled=p.first,enabled <= 1 { state.switches[6]=enabled == 1;observed=Command.switches }
             else { return false }
         case .xiaomi:
