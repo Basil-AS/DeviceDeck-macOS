@@ -262,7 +262,7 @@ struct PanelView: View {
     private func baseusPowerValue(_ code:UInt16,_ reading:DevicePowerReading) -> String {
         if code == 13 || code == 37 { return "\(reading.value-100) °C" }
         if code == 16 { return String(format:"0x%04X",reading.value) }
-        if code == 18 { return "#\(reading.value)" }
+        if code == 18 { return BaseusPortProtocol.negotiatedProtocols(reading.value,isBlade2_140:app.state.powerAccessoryBlade2_140) ?? L("未知","Unknown") }
         if [21,22,30,31].contains(code) { return "\(reading.value) min" }
         if (40...45).contains(code) { return String(format:"%.2f V",Double(reading.value)/1000) }
         if (49...54).contains(code) { return String(format:"%.2f A",Double(reading.value)/1000) }

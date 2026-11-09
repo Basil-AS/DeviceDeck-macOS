@@ -59,6 +59,20 @@ struct BaseusPowerCodec {
     }
 }
 
+public enum BaseusPortProtocol {
+    private static let standard=["", "PPS", "PD3.0", "QC2.0", "QC3.0", "AFC", "FCP", "SCP"]
+    private static let blade2_140=["", "DCP", "", "QC", "", "AFC", "FCP", "SCP", "PD"]
+
+    public static func negotiatedProtocols(_ value:Int,isBlade2_140:Bool) -> String? {
+        let table=isBlade2_140 ? blade2_140 : standard
+        let names=[("C1",value & 0xFF),("C2",(value >> 8) & 0xFF)].compactMap { port,index -> String? in
+            guard index > 0 else { return nil }
+            return "\(port) \(index < table.count && !table[index].isEmpty ? table[index] : "#\(index)")"
+        }
+        return names.isEmpty ? nil : names.joined(separator:" · ")
+    }
+}
+
 /// Baseus Blade 2 telemetry and display controls inside DeviceDeck's shared device session.
 @MainActor final class BaseusBlade2Session:AdditionalSession {
     private(set) var state=DeviceState()
@@ -76,6 +90,7 @@ struct BaseusPowerCodec {
     init(transport:EarbudTransport,name:String,catalog:ModelCatalog) {
         model=catalog.models.first{$0.id == "baseus:blade-2"}
         extended=name.localizedCaseInsensitiveContains("140")
+        state.powerAccessoryBlade2_140=extended
         var codec=BaseusPowerCodec()
         channel=ControlChannel(transport:transport,timeout:3,
                               decode:{codec.feed($0)},reset:{codec.reset()})
