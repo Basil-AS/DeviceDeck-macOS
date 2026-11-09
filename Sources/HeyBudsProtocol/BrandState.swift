@@ -83,6 +83,7 @@ public enum BrandState {
             else if c == 0xCC,let mode=p.first,let value=([1:NoiseMode.off,2:.anc,3:.transparency])[Int(mode)] { state.noise=value;observed=Command.noise }
             else if c == 0xD5,let value=p.first,model.presets.contains(where:{$0.id == value}) { state.eq=value;observed=Command.equalizer }
             else if c == 0xD3,p.count >= 2 { state.edifierSleepTimerMinutes=UInt16(p[0]) << 8 | UInt16(p[1]);observed=Command.edifierSleepTimer }
+            else if c == 0xD7,let enabled=p.first,enabled <= 1 { state.edifierAutoPowerOff=enabled == 1;observed=Command.edifierAutoPowerOff }
             else if c == 0x08,let enabled=p.first,enabled <= 1 { state.switches[6]=enabled == 1;observed=Command.switches }
             else { return false }
         case .xiaomi:
