@@ -7,10 +7,14 @@ import HeyBudsProtocol
 public struct BLEControlProfile:Sendable {
     public let service:String
     /// UUID advertised for discovery when it differs from the control service.
-    public let discoveryService:String?=nil
+    public let discoveryService:String?
     public let write:String
     public let notify:String
     public let bmapSegmentation:Bool
+    public init(service:String,discoveryService:String?=nil,write:String,notify:String,bmapSegmentation:Bool) {
+        self.service=service;self.discoveryService=discoveryService
+        self.write=write;self.notify=notify;self.bmapSegmentation=bmapSegmentation
+    }
     public static let oppo=BLEControlProfile(service:"0000079A-D102-11E1-9B23-00025B00A5A5",write:"0100079A-D102-11E1-9B23-00025B00A5A5",notify:"0200079A-D102-11E1-9B23-00025B00A5A5",bmapSegmentation:false)
     public static let jbl=BLEControlProfile(service:JBLProfile.service,write:JBLProfile.write,notify:JBLProfile.notify,bmapSegmentation:false)
     public static let xiaomi=BLEControlProfile(service:XiaomiProfile.bleService,write:XiaomiProfile.bleWrite,notify:XiaomiProfile.bleNotify,bmapSegmentation:false)
