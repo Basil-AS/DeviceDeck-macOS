@@ -86,6 +86,8 @@ public enum BrandState {
             else if c == 0xD7,let enabled=p.first,enabled <= 1 { state.edifierAutoPowerOff=enabled == 1;observed=Command.edifierAutoPowerOff }
             else if c == 0xF9,let enabled=p.first,enabled <= 1 { state.edifierPromptTone=enabled == 1;observed=Command.edifierPromptTone }
             else if c == 0x05,let level=p.first,level <= 15,state.edifierCapabilityReport?.reportedControls.contains("voicePromptLevel") == true { state.edifierPromptVolume=level;observed=Command.edifierPromptVolume }
+            else if c == 0xC6,!p.isEmpty { state.firmware=p.map(String.init).joined(separator:".");observed=Command.firmware }
+            else if c == 0xC8,p.count == 6 { state.edifierBluetoothAddress=p.map { String(format:"%02X",$0) }.joined(separator:":");observed=Command.edifierBluetoothAddress }
             else if c == 0xC9,let name=String(bytes:p.prefix(while:{$0 != 0}),encoding:.utf8),!name.isEmpty { state.edifierBluetoothName=name;observed=Command.edifierBluetoothName }
             else if c == 0xFD,p.count >= 2,
                     state.edifierCapabilityReport?.reportedControls.contains("touchSensitivity") == true,
