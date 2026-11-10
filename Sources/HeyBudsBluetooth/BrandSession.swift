@@ -440,6 +440,15 @@ import HeyBudsProtocol
         guard let actual=state.edifierTouchControls.first(where:{$0.index == index}),actual.action == action,actual.noiseMask == expectedMask else { throw ProtocolError.readbackMismatch }
         return .confirmed
     }
+    func performEdifierBluetoothAction(_ command:UInt16,capability:String) async throws -> WriteOutcome {
+        guard family == .edifier,ready,
+              state.edifierCapabilityReport?.reportedControls.contains(capability) == true,
+              command == 0xCD || command == 0xCF else { throw ProtocolError.unsupported }
+        // The vendor command is one-way: a successful BLE write does not confirm
+        // that the audio link was dropped or the headset entered pairing mode.
+        try await send(command)
+        return .sent
+    }
     func setSpatial(_ value:UInt8) async throws -> WriteOutcome {
         guard canWrite(Command.setSpatial,reading:Command.spatial),model.spatialModes.contains(value),family == .vivo else { throw ProtocolError.unsupported }
         return try await confirmedWrite(command:0x0139,payload:[value]+(spatialScene.map { [$0] } ?? []),read:Command.spatial) { $0.spatial == value }
