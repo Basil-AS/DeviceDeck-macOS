@@ -95,6 +95,7 @@ public struct BrandFrameCodec:Sendable {
             }
             let header=family == .xiaomi ? 8 : family == .vivo ? 8 : family == .huawei ? 6 : 3
             guard buffer.count >= header else { break }
+            if family == .edifier,edifierProtocol.version == 2,buffer.count < 5 { break }
             let total:Int
             switch family {
             case .vivo:
@@ -111,7 +112,6 @@ public struct BrandFrameCodec:Sendable {
                 total=count+8
             case .edifier:
                 if edifierProtocol.version == 2 {
-                    guard buffer.count >= 5 else { break }
                     guard buffer[1] == edifierProtocol.appCode else { buffer.removeFirst();continue }
                     total=(Int(buffer[3])<<8 | Int(buffer[4]))+6
                 } else {
