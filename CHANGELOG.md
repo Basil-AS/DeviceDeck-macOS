@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0-alpha.31 — 2026-11-10
+
+- Negotiate W820NB Plus BLE v1/v2 framing and Encryption10 XOR from the Edifier manufacturer advertisement. Preserve v1 behavior for legacy advertisements and report the selected mode in connection diagnostics.
+- Parse v2 frames with the EDIFIER app code, 16-bit parameter length, and additive 8-bit checksum while keeping model-specific command gating unchanged.
+- Physical W820NB Plus packet round-trip still needs verification. This macOS build is ad-hoc signed and not notarized.
+
 ## 0.7.0-alpha.30 — 2026-11-10
 
 - Add capability-gated EDIFIER W820NB Plus power-off (`0xCE`) in the macOS device panel. Require explicit confirmation; the command is one-way and the headset may disconnect without a state readback. Physical headset behavior remains unverified.
