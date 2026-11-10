@@ -34,6 +34,7 @@ struct PanelView: View {
     @ViewState<Bool> private var blade2ResetConfirmation=false
     @ViewState<Bool> private var edifierDisconnectConfirmation=false
     @ViewState<Bool> private var edifierPairingConfirmation=false
+    @ViewState<Bool> private var edifierPowerOffConfirmation=false
     @ViewState<String> private var powerDisplayText=""
     @ViewState<String> private var powerReminderMinutes=""
     @ViewState<String> private var powerShutdownMinutes=""
@@ -98,6 +99,14 @@ struct PanelView: View {
             Button(L("取消","Cancel"),role:.cancel) { }
         } message: {
             Text(L("耳机可能断开当前音频连接并进入可配对状态。DeviceDeck 无法确认操作结果。","The headphones may leave the current audio connection and become available for pairing. DeviceDeck cannot verify the result."))
+        }
+        .alert(L("Выключить наушники?","Power off headphones?"),isPresented:$edifierPowerOffConfirmation) {
+            Button(L("Выключить","Power off"),role:.destructive) {
+                app.perform { try await $0.powerOffEdifier() }
+            }
+            Button(L("Отмена","Cancel"),role:.cancel) { }
+        } message: {
+            Text(L("Наушники могут сразу отключиться. DeviceDeck не получает подтверждение выключения.","The headphones may disconnect immediately. DeviceDeck receives no power-off confirmation."))
         }
         .font(.system(size:13))
         .onChange(of:app.selectedID) { _,_ in page = .home;editEQ=nil }
@@ -755,6 +764,16 @@ struct PanelView: View {
                             Text(minutes == 0 ? L("Выключено","Off") : L("\(minutes) мин","\(minutes) min")).tag(minutes)
                         }
                     }
+                }
+            }
+            if app.state.edifierCapabilityReport?.reportedControls.contains("powerOff") == true {
+                settingsGroup(L("电源","Power")) {
+                    Button { edifierPowerOffConfirmation=true } label: {
+                        Label(L("Выключить наушники","Power off headphones"),systemImage:"power")
+                            .frame(maxWidth:.infinity,alignment:.leading)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(!app.ready || app.operationBusy)
                 }
             }
             if app.state.edifierCapabilityReport?.reportedControls.contains("autoPowerOff") == true,
