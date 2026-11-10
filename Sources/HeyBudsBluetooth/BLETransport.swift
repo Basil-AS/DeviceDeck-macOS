@@ -66,7 +66,15 @@ public struct BLEControlProfile:Sendable {
                 .filter { matches($0.name) }
             if connected.count == 1 { attach(connected[0]) }
             else if connected.count > 1 { fail(TransportFailure.unavailable("Several BLE devices have the same name")) }
-            else { central.scanForPeripherals(withServices:[CBUUID(string:discoveryUUID)],options:[CBCentralManagerScanOptionAllowDuplicatesKey:false]) }
+            else {
+                // CoreBluetooth applies service filtering before didDiscover, so a
+                // name match cannot rescue an Edifier headset whose advertisement
+                // omits the product-search UUID. Keep the exact target-name gate in
+                // didDiscover and scan unfiltered for this one profile.
+                let services:[CBUUID]? = profile.service == BLEControlProfile.edifier.service
+                    ? nil : [CBUUID(string:discoveryUUID)]
+                central.scanForPeripherals(withServices:services,options:[CBCentralManagerScanOptionAllowDuplicatesKey:false])
+            }
         case .unauthorized: fail(TransportFailure.unavailable("Bluetooth permission denied. Allow HeyBuds in System Settings → Privacy & Security → Bluetooth."))
         case .poweredOff: fail(TransportFailure.unavailable("Bluetooth is turned off"))
         case .unsupported: fail(TransportFailure.unavailable("Bluetooth Low Energy is unavailable"))
