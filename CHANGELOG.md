@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.0-alpha.27 — 2026-11-10
+
+- Correct the EDIFIER W820NB Plus BLE profile using the control service and read/write characteristic UUIDs embedded in EDIFIER Connect 8.4.28. Scan using the distinct advertised discovery UUID. Static app evidence only; physical connection and command round-trip remain unverified.
+
 ## 0.7.0-alpha.26 — 2026-11-10
 
 - Add the realme Buds Air7 Pro dual-device connection switch to the unified DeviceDeck macOS app. DeviceDeck exposes the multipoint toggle; connected-device management is not mapped. Hardware verification remains open.
