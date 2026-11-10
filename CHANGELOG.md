@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.0-alpha.28 — 2026-11-10
+
+- Show capability-gated EDIFIER W820NB Plus firmware version (C6) and Bluetooth address (C8) in the unified DeviceDeck macOS app. Static vendor-app evidence; physical-headset queries remain unverified.
+
 ## 0.7.0-alpha.27 — 2026-11-10
 
 - Correct the EDIFIER W820NB Plus BLE profile using the control service and read/write characteristic UUIDs embedded in EDIFIER Connect 8.4.28. Scan using the distinct advertised discovery UUID. Static app evidence only; physical connection and command round-trip remain unverified.
