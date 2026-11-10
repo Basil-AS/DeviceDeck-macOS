@@ -99,7 +99,7 @@ import HeyBudsProtocol
     func refresh() async {
         guard ready else { return }
         let token=generation
-        for command in [Command.battery,Command.noise,Command.equalizer,Command.spatial,Command.switches,Command.wear,Command.firmware,Command.hosts,Command.edifierSleepTimer,Command.edifierAutoPowerOff,Command.edifierPromptTone,Command.edifierPromptVolume,Command.edifierBluetoothName,Command.edifierTouchSensitivity] where canQuery(command) {
+        for command in [Command.battery,Command.noise,Command.equalizer,Command.spatial,Command.switches,Command.wear,Command.firmware,Command.hosts,Command.edifierSleepTimer,Command.edifierAutoPowerOff,Command.edifierPromptTone,Command.edifierPromptVolume,Command.edifierBluetoothName,Command.edifierBluetoothAddress,Command.edifierTouchSensitivity] where canQuery(command) {
             guard !Task.isCancelled,ready,generation == token else { return }
             _ = try? await read(command)
         }
@@ -137,8 +137,10 @@ import HeyBudsProtocol
         case Command.edifierPromptTone:return family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("promptToneSwitch") == true
         case Command.edifierPromptVolume:return family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("voicePromptLevel") == true
         case Command.edifierBluetoothName:return family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("readName") == true
+        case Command.edifierBluetoothAddress:return family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("readAddress") == true
         case Command.edifierTouchSensitivity:return family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("touchSensitivity") == true
-        case Command.wear,Command.firmware:return family == .vivo
+        case Command.wear:return family == .vivo
+        case Command.firmware:return family == .vivo || (family == .edifier && state.edifierCapabilityReport?.reportedControls.contains("firmware") == true)
         default:return false
         }
     }
@@ -216,6 +218,12 @@ import HeyBudsProtocol
             case Command.edifierBluetoothName:
                 guard state.edifierCapabilityReport?.reportedControls.contains("readName") == true else { throw ProtocolError.unsupported }
                 sample = try await readRequest(0xC9)
+            case Command.firmware:
+                guard state.edifierCapabilityReport?.reportedControls.contains("firmware") == true else { throw ProtocolError.unsupported }
+                sample = try await readRequest(0xC6)
+            case Command.edifierBluetoothAddress:
+                guard state.edifierCapabilityReport?.reportedControls.contains("readAddress") == true else { throw ProtocolError.unsupported }
+                sample = try await readRequest(0xC8)
             case Command.edifierTouchSensitivity:
                 guard state.edifierCapabilityReport?.reportedControls.contains("touchSensitivity") == true else { throw ProtocolError.unsupported }
                 sample = try await readRequest(0xFD)

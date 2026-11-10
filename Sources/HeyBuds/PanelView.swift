@@ -685,6 +685,9 @@ struct PanelView: View {
                             }
                         }
                     }
+                    if report.reportedControls.contains("readAddress"),let address=app.state.edifierBluetoothAddress {
+                        infoRow(L("蓝牙地址","Bluetooth address"),address)
+                    }
                     Text(L("报告能力不表示该功能已在 DeviceDeck 中实现。","A reported capability does not mean DeviceDeck implements that control yet."))
                         .font(.system(size:10)).foregroundStyle(.tertiary)
                 }.card()
