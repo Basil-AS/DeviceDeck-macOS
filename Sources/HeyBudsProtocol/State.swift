@@ -104,6 +104,8 @@ public struct DeviceState: Sendable {
     public var edifierPromptVolume: UInt8?
     /// Bluetooth name returned by the Edifier C9 query.
     public var edifierBluetoothName: String?
+    /// Bluetooth address returned by the Edifier C8 query.
+    public var edifierBluetoothAddress: String?
     /// Indexed touch sensitivity reported by Edifier FD (write/readback FE/FD).
     public var edifierTouchSensitivityIndex: UInt8?
     public var edifierTouchSensitivityValue: UInt8?

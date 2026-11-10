@@ -65,6 +65,7 @@ public enum Command {
     public static let edifierPromptTone: UInt16 = 0x00F9
     public static let edifierPromptVolume: UInt16 = 0x0005
     public static let edifierBluetoothName: UInt16 = 0x00C9
+    public static let edifierBluetoothAddress: UInt16 = 0x00C8
     public static let edifierTouchSensitivity: UInt16 = 0x00FD
     public static let edifierTouchControls: UInt16 = 0x00F0
     public static let noise: UInt16 = 0x010C, switches: UInt16 = 0x010D, equalizer: UInt16 = 0x010F
