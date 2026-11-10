@@ -30,6 +30,7 @@ public struct BLEControlProfile:Sendable {
 @MainActor public final class BLETransport: NSObject, EarbudTransport, @preconcurrency CBCentralManagerDelegate, @preconcurrency CBPeripheralDelegate {
     public var onEvent: ((TransportEvent) -> Void)?
     public let label="BLE GATT"
+    public private(set) var edifierProtocol=EdifierBLEProtocol.legacy
     private let targetName: String
     private let profile:BLEControlProfile
     private var bmapCodec=BoseGATTCodec()
@@ -59,7 +60,9 @@ public struct BLEControlProfile:Sendable {
         switch central.state {
         case .poweredOn:
             let discoveryUUID=profile.discoveryService ?? profile.service
-            let connected=central.retrieveConnectedPeripherals(withServices:[CBUUID(string:discoveryUUID)])
+            // Edifier's v2 command codec depends on manufacturer data. A cached
+            // peripheral returned here has no advertisement, so scan to negotiate it.
+            let connected=(profile.service == BLEControlProfile.edifier.service ? [] : central.retrieveConnectedPeripherals(withServices:[CBUUID(string:discoveryUUID)]))
                 .filter { matches($0.name) }
             if connected.count == 1 { attach(connected[0]) }
             else if connected.count > 1 { fail(TransportFailure.unavailable("Several BLE devices have the same name")) }
@@ -76,6 +79,9 @@ public struct BLEControlProfile:Sendable {
         guard !closing,central === self.central else { return }
         let name=peripheral.name ?? advertisementData[CBAdvertisementDataLocalNameKey] as? String
         guard matches(name), self.peripheral == nil else { return }
+        if profile.discoveryService == BLEControlProfile.edifier.discoveryService {
+            edifierProtocol=EdifierBLEProtocol.fromAdvertisement(advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data)
+        }
         attach(peripheral)
     }
     private func matches(_ name:String?) -> Bool {

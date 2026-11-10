@@ -10,12 +10,40 @@ public struct BrandFrame:Equatable,Sendable {
         self.command=command;self.payload=payload;self.sequence=sequence;self.kind=kind
     }
 }
+
+/// BLE framing advertised by Edifier devices. `encryptionKey` is the effective
+/// XOR byte used on frame parameters, not the vendor enum value.
+public struct EdifierBLEProtocol:Equatable,Sendable {
+    public let version:UInt8
+    public let encryptionKey:UInt8
+    public let appCode:UInt8
+    public static let legacy=EdifierBLEProtocol(version:1,encryptionKey:0,appCode:0xEC)
+    public init(version:UInt8,encryptionKey:UInt8=0,appCode:UInt8=0xEC) {
+        self.version=version;self.encryptionKey=encryptionKey;self.appCode=appCode
+    }
+    /// CoreBluetooth manufacturer data includes the Bluetooth company ID (little endian).
+    public static func fromAdvertisement(_ data:Data?) -> EdifierBLEProtocol {
+        guard let data else { return .legacy }
+        let bytes=Array(data)
+        let payload:[UInt8]
+        if bytes.count >= 4,bytes[0] == 0xE0,bytes[1] == 0x07 { payload=Array(bytes.dropFirst(2)) }
+        else { return .legacy }
+        guard payload.count >= 2 else { return .legacy }
+        let version:UInt8=payload[payload.count-2] > 1 ? 2 : 1
+        let encryption:UInt8=payload.last == 16 ? 0xA5 : 0
+        return EdifierBLEProtocol(version:version,encryptionKey:encryption)
+    }
+}
+
 public struct BrandFrameCodec:Sendable {
     public let family:EarbudFamily
     public let gaiaVersion:UInt8
     public let mbb:Bool
+    public let edifierProtocol:EdifierBLEProtocol
     private var buffer:[UInt8]=[]
-    public init(family:EarbudFamily,gaiaVersion:UInt8=4,mbb:Bool=false) { self.family=family;self.gaiaVersion=gaiaVersion;self.mbb=mbb }
+    public init(family:EarbudFamily,gaiaVersion:UInt8=4,mbb:Bool=false,edifierProtocol:EdifierBLEProtocol = .legacy) {
+        self.family=family;self.gaiaVersion=gaiaVersion;self.mbb=mbb;self.edifierProtocol=edifierProtocol
+    }
     public func encode(_ frame:BrandFrame) throws -> Data {
         let p=frame.payload,c=frame.command
         var bytes:[UInt8]
@@ -31,7 +59,13 @@ public struct BrandFrameCodec:Sendable {
             bytes += [UInt8(c>>8),UInt8(truncatingIfNeeded:c)]+p
             let crc=Self.crc16(bytes);bytes += [UInt8(crc>>8),UInt8(truncatingIfNeeded:crc)]
         case .edifier:
-            guard p.count <= 254, c <= 255 else { throw ProtocolError.invalidPayload }
+            guard p.count <= (edifierProtocol.version == 2 ? 65535 : 254), c <= 255 else { throw ProtocolError.invalidPayload }
+            if edifierProtocol.version == 2 {
+                let encrypted=p.map { $0 ^ edifierProtocol.encryptionKey }
+                bytes=[0xAA,edifierProtocol.appCode,UInt8(c),UInt8(encrypted.count>>8),UInt8(truncatingIfNeeded:encrypted.count)]+encrypted
+                bytes.append(UInt8(truncatingIfNeeded:bytes.reduce(UInt16(0)) { $0 &+ UInt16($1) }))
+                return Data(bytes)
+            }
             // Upstream's encoder allocated one byte too few. Follow its documented
             // len=command+payload and checksum over ALL preceding bytes.
             bytes=[0xAA,UInt8(p.count+1),UInt8(c)]+p
@@ -76,7 +110,13 @@ public struct BrandFrameCodec:Sendable {
                 guard count >= 1,count <= 4097 else { buffer.removeFirst();continue }
                 total=count+8
             case .edifier:
-                guard buffer[1] >= 1 else { buffer.removeFirst();continue };total=Int(buffer[1])+4
+                if edifierProtocol.version == 2 {
+                    guard buffer.count >= 5 else { break }
+                    guard buffer[1] == edifierProtocol.appCode else { buffer.removeFirst();continue }
+                    total=(Int(buffer[3])<<8 | Int(buffer[4]))+6
+                } else {
+                    guard buffer[1] >= 1 else { buffer.removeFirst();continue };total=Int(buffer[1])+4
+                }
             default:return frames
             }
             guard buffer.count >= total else { break }
@@ -86,14 +126,24 @@ public struct BrandFrameCodec:Sendable {
                 guard bytes[total-2] == UInt8(crc>>8),bytes[total-1] == UInt8(truncatingIfNeeded:crc) else { buffer.removeFirst();continue }
             }
             if family == .edifier {
-                let sum=bytes.dropLast(2).reduce(UInt16(8217)) { $0 &+ UInt16($1) }
-                guard bytes[total-2] == UInt8(sum>>8),bytes[total-1] == UInt8(truncatingIfNeeded:sum) else { buffer.removeFirst();continue }
+                if edifierProtocol.version == 2 {
+                    let sum=bytes.dropLast().reduce(UInt8(0)) { $0 &+ $1 }
+                    guard bytes.last == sum else { buffer.removeFirst();continue }
+                } else {
+                    let sum=bytes.dropLast(2).reduce(UInt16(8217)) { $0 &+ UInt16($1) }
+                    guard bytes[total-2] == UInt8(sum>>8),bytes[total-1] == UInt8(truncatingIfNeeded:sum) else { buffer.removeFirst();continue }
+                }
             }
             if family == .xiaomi,bytes.last != 0xEF { buffer.removeFirst();continue }
             switch family {
             case .vivo:frames.append(BrandFrame(UInt16(bytes[6])<<8 | UInt16(bytes[7]),Array(bytes[8...])))
             case .huawei:frames.append(BrandFrame(UInt16(bytes[4])<<8 | UInt16(bytes[5]),Array(bytes[6..<total-2])))
-            case .edifier:frames.append(BrandFrame(UInt16(bytes[2]),Array(bytes[3..<total-2])))
+            case .edifier:
+                if edifierProtocol.version == 2 {
+                    frames.append(BrandFrame(UInt16(bytes[2]),Array(bytes[5..<total-1]).map { $0 ^ edifierProtocol.encryptionKey }))
+                } else {
+                    frames.append(BrandFrame(UInt16(bytes[2]),Array(bytes[3..<total-2])))
+                }
             case .xiaomi:frames.append(BrandFrame(UInt16(bytes[4]),Array(bytes[8..<total-1]),sequence:bytes[7],kind:bytes[3]))
             default:break
             }
