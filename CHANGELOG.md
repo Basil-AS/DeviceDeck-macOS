@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.0-alpha.32 — 2026-11-10
+
+- Scan without a CoreBluetooth service filter for EDIFIER W820NB Plus, then validate its advertised name in the discovery callback. This allows the headset to be found when its advertisement omits the product-search UUID. Physical-device discovery and control remain unverified.
+
 ## 0.7.0-alpha.31 — 2026-11-10
 
 - Negotiate W820NB Plus BLE v1/v2 framing and Encryption10 XOR from the Edifier manufacturer advertisement. Preserve v1 behavior for legacy advertisements and report the selected mode in connection diagnostics.
