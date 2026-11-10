@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.0-alpha.29 — 2026-11-10
+
+- Add capability-gated EDIFIER W820NB Plus audio disconnect (`0xCD`) and Bluetooth repair/pairing (`0xCF`) actions to the macOS device panel. Both require confirmation; DeviceDeck reports the commands as sent because the protocol path has no state readback. Static vendor-app evidence; physical-headset behavior remains unverified.
+
 ## 0.7.0-alpha.28 — 2026-11-10
 
 - Show capability-gated EDIFIER W820NB Plus firmware version (C6) and Bluetooth address (C8) in the unified DeviceDeck macOS app. Static vendor-app evidence; physical-headset queries remain unverified.

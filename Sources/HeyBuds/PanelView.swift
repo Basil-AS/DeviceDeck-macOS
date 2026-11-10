@@ -32,6 +32,8 @@ struct PanelView: View {
     @ViewState<EQEditingContext?> private var editEQ:EQEditingContext? = nil
     @ViewState<Bool> private var findConfirmation=false
     @ViewState<Bool> private var blade2ResetConfirmation=false
+    @ViewState<Bool> private var edifierDisconnectConfirmation=false
+    @ViewState<Bool> private var edifierPairingConfirmation=false
     @ViewState<String> private var powerDisplayText=""
     @ViewState<String> private var powerReminderMinutes=""
     @ViewState<String> private var powerShutdownMinutes=""
@@ -80,6 +82,22 @@ struct PanelView: View {
             Button(L("取消","Cancel"),role:.cancel) { }
         } message: {
             Text(L("将发送 Baseus 应用中的恢复出厂设置命令。DeviceDeck 无法确认重置结果。","This sends the factory-reset command found in Baseus's app. DeviceDeck cannot verify whether the reset completed."))
+        }
+        .alert(L("断开音频连接","Disconnect audio"),isPresented:$edifierDisconnectConfirmation) {
+            Button(L("断开音频","Disconnect audio"),role:.destructive) {
+                app.perform { try await $0.disconnectEdifierAudio() }
+            }
+            Button(L("取消","Cancel"),role:.cancel) { }
+        } message: {
+            Text(L("要向耳机发送断开音频连接命令吗？设备不会提供状态回读。","Send the headphones the audio-disconnect command? The action has no state readback."))
+        }
+        .alert(L("进入配对模式","Enter pairing mode"),isPresented:$edifierPairingConfirmation) {
+            Button(L("继续","Continue")) {
+                app.perform { try await $0.enterEdifierPairingMode() }
+            }
+            Button(L("取消","Cancel"),role:.cancel) { }
+        } message: {
+            Text(L("耳机可能断开当前音频连接并进入可配对状态。DeviceDeck 无法确认操作结果。","The headphones may leave the current audio connection and become available for pairing. DeviceDeck cannot verify the result."))
         }
         .font(.system(size:13))
         .onChange(of:app.selectedID) { _,_ in page = .home;editEQ=nil }
@@ -697,6 +715,32 @@ struct PanelView: View {
     private var advancedPage:some View {
         VStack(alignment:.leading,spacing:16) {
             if !app.ready { offlineNote }
+            if let report=app.state.edifierCapabilityReport {
+                let canDisconnect=report.reportedControls.contains("disconnectAudio")
+                let canRepair=report.reportedControls.contains("repairBluetooth")
+                if canDisconnect || canRepair {
+                    settingsGroup(L("Bluetooth","Bluetooth")) {
+                        VStack(alignment:.leading,spacing:8) {
+                            if canDisconnect {
+                                Button { edifierDisconnectConfirmation=true } label: {
+                                    Label(L("断开音频","Disconnect audio"),systemImage:"speaker.slash")
+                                        .frame(maxWidth:.infinity,alignment:.leading)
+                                }
+                                .buttonStyle(.bordered)
+                                .disabled(!app.ready || app.operationBusy)
+                            }
+                            if canRepair {
+                                Button { edifierPairingConfirmation=true } label: {
+                                    Label(L("进入配对模式","Pairing mode"),systemImage:"dot.radiowaves.left.and.right")
+                                        .frame(maxWidth:.infinity,alignment:.leading)
+                                }
+                                .buttonStyle(.bordered)
+                                .disabled(!app.ready || app.operationBusy)
+                            }
+                        }
+                    }
+                }
+            }
             if hasSoundControls {
                 settingsGroup(L("声音与音效","Sound & audio")) { soundControls }
             }
