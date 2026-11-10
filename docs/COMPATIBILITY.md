@@ -8,7 +8,7 @@
 | vivo / iQOO | 43 个显示型号，保留 87 条原始配置与项目代号 | GAIA、电量、佩戴、固件、降噪、EQ、游戏、空间音频、查找、多设备 |
 | HUAWEI / HONOR | 27 个型号路由及别名 | 华为 Legacy TLV 原有功能；荣耀三款沿用 FreeBuds 4i 配置 |
 | Xiaomi / Redmi | 16 个精确型号及保留的 1 条系列规则 | 10 款按型号提供 MMA 控制，6 款仅基础信息/电量；旧系列后端独立保留 |
-| EDIFIER | W820NB / W200BT / EDIFIER，共 3 条规则 | SPP 电量及降噪；纯 BLE 型号未接入 |
+| EDIFIER | W820NB Plus / W820NB / W200BT / EDIFIER | W820NB Plus BLE v1/v2 packet modes from manufacturer advertisement; other listed models use SPP where supported |
 | Baseus | Bass EP10 Pro | macOS SPP：电量、ANC/通透；尚未实机验证 |
 | Baseus | Bowie 30 | macOS BLE：电量、降噪状态、关闭/通勤/室内/户外降噪/通透；尚未实机验证 |
 | Baseus | Bowie MF1 | macOS SPP：左右耳电量（BA02）；噪声与手势控制映射尚未确认，不开放；尚未实机验证 |
