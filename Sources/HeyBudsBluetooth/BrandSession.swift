@@ -46,6 +46,10 @@ import HeyBudsProtocol
             switch event { case .data(let data):self.receive(data);case .closed(let reason):self.close();self.onClose?(reason) }
         }
         try await transport.open()
+        if family == .edifier,let ble=transport as? BLETransport {
+            codec=BrandFrameCodec(family:family,gaiaVersion:UInt8(model.raw["gaiaVersion"].int ?? 4),edifierProtocol:ble.edifierProtocol)
+            onDiagnostic?("Edifier BLE v\(ble.edifierProtocol.version) · \(ble.edifierProtocol.encryptionKey == 0 ? "no encryption" : "encrypted")")
+        }
         try Task.checkCancellation()
         guard generation == token else { throw ProtocolError.disconnected }
         switch family {
