@@ -443,9 +443,11 @@ import HeyBudsProtocol
     func performEdifierBluetoothAction(_ command:UInt16,capability:String) async throws -> WriteOutcome {
         guard family == .edifier,ready,
               state.edifierCapabilityReport?.reportedControls.contains(capability) == true,
-              command == 0xCD || command == 0xCF else { throw ProtocolError.unsupported }
-        // The vendor command is one-way: a successful BLE write does not confirm
-        // that the audio link was dropped or the headset entered pairing mode.
+              (command == 0xCD && capability == "disconnectAudio" ||
+               command == 0xCF && capability == "repairBluetooth" ||
+               command == 0xCE && capability == "powerOff") else { throw ProtocolError.unsupported }
+        // These vendor commands are one-way. A successful BLE write does not
+        // confirm disconnection, pairing state, or power-off completion.
         try await send(command)
         return .sent
     }
