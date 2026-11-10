@@ -6,6 +6,8 @@ import HeyBudsProtocol
 /// are never candidates for a control session.
 public struct BLEControlProfile:Sendable {
     public let service:String
+    /// UUID advertised for discovery when it differs from the control service.
+    public let discoveryService:String?=nil
     public let write:String
     public let notify:String
     public let bmapSegmentation:Bool
@@ -14,7 +16,7 @@ public struct BLEControlProfile:Sendable {
     public static let xiaomi=BLEControlProfile(service:XiaomiProfile.bleService,write:XiaomiProfile.bleWrite,notify:XiaomiProfile.bleNotify,bmapSegmentation:false)
     /// Community-documented W820NB family GATT service. Keep this profile
     /// name-gated until the endpoint is verified on additional Edifier models.
-    public static let edifier=BLEControlProfile(service:"48093801-1A48-11E9-AB14-D663BD873D93",write:"48093803-1A48-11E9-AB14-D663BD873D93",notify:"48093802-1A48-11E9-AB14-D663BD873D93",bmapSegmentation:false)
+    public static let edifier=BLEControlProfile(service:"4809A501-1A48-11E9-AB14-D663BD873D93",discoveryService:"0000A500-0000-1000-8000-00805F9B34FB",write:"48090002-1A48-11E9-AB14-D663BD873D93",notify:"48090001-1A48-11E9-AB14-D663BD873D93",bmapSegmentation:false)
     /// Baseus Intelligent EU `app_device_ble_config` profile. Device identity and
     /// command routing remain name-gated; sharing these UUIDs alone is not enough.
     public static let baseus=BLEControlProfile(service:"53527AA4-29F7-AE11-4E74-997334782568",write:"EE684B1A-1E9B-ED3E-EE55-F894667E92AC",notify:"654B749C-E37F-AE1F-EBAB-40CA133E3690",bmapSegmentation:false)
@@ -52,11 +54,12 @@ public struct BLEControlProfile:Sendable {
         guard !closing,central === self.central else { return }
         switch central.state {
         case .poweredOn:
-            let connected=central.retrieveConnectedPeripherals(withServices:[CBUUID(string:profile.service)])
+            let discoveryUUID=profile.discoveryService ?? profile.service
+            let connected=central.retrieveConnectedPeripherals(withServices:[CBUUID(string:discoveryUUID)])
                 .filter { matches($0.name) }
             if connected.count == 1 { attach(connected[0]) }
             else if connected.count > 1 { fail(TransportFailure.unavailable("Several BLE devices have the same name")) }
-            else { central.scanForPeripherals(withServices:[CBUUID(string:profile.service)],options:[CBCentralManagerScanOptionAllowDuplicatesKey:false]) }
+            else { central.scanForPeripherals(withServices:[CBUUID(string:discoveryUUID)],options:[CBCentralManagerScanOptionAllowDuplicatesKey:false]) }
         case .unauthorized: fail(TransportFailure.unavailable("Bluetooth permission denied. Allow HeyBuds in System Settings → Privacy & Security → Bluetooth."))
         case .poweredOff: fail(TransportFailure.unavailable("Bluetooth is turned off"))
         case .unsupported: fail(TransportFailure.unavailable("Bluetooth Low Energy is unavailable"))
